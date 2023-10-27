@@ -1,5 +1,6 @@
 # hviezdna-obloha
 Projekt na Tvorbu informačných systémov 2023 - prehliadanie databázy pozorovaní
 
-Pipenv installation
+### Project setup on Windows
+Pipenv
 - pip install pipenv
