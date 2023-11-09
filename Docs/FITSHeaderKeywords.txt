@@ -1,0 +1,107 @@
+SIMPLE  = T                                 / file does conform to FITS standard		N/A						Netreba v DB
+BITPIX  = 16                                     / number of bits per data pixel		N/A						Netreba v DB
+NAXIS   = 2                                                / number of data axes		integer interval (0,10)				vlozit do DB, Keyword a hodnota vzdy existuje
+NAXIS1  = 1024                                           / length of data axis 1		integer interval (0,100000)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+NAXIS2  = 1024                                           / length of data axis 2		integer interval (0,100000)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+EXTEND  = T                                / FITS dataset may contain extensions		N/A						netreba v DB
+BZERO   = 32768                    / offset data range to that of unsigned short		N/A						netreba v DB
+BSCALE  = 1                                             / default scaling factor		N/A						netreba v DB
+IMAGETYP= 'LIGHT   '                                                            		String dlzka (0,10)				vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+FILTER  = 'C       '                                                            		String dlzka (0,3)				vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+OBJECT  = '06004B_2'                                                            		String dlzka (0,100)				vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat, ak nazov obsahuje "_" treba rozdelit na nazov objektu (prva cast stringu) a cislo serie (druha cast stringu)
+NOTES   = '        '                                                            		String dlzka (0,1000)				vlozit do DB, Keyword a hodnota vzzdy existuje - vacsinou prazny string ale moze obsahovat aj relevatntu info vo forme stringu
+DATE-OBS= '2023-05-03T19:24:30.792'                / Time of exposure start, UTC		String dlzka 23					vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat 
+MJD-OBS = 60067.80869262                  / MJD of observation mid-exposure, UTC		float interval (0, 100000.00000000)		vlozit do DB,, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat (pravdepodobnejsie jednoduchsie na filtrovanie ako ISOT format o riadok vyssie) - modifikovany juliansky 											datum - viac o formate casu tu https://core2.gsfc.nasa.gov/time/
+EXPTIME = 0.50                                             / Exposure time [sec]		float interval (0, 360.0)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+CCD-TEMP= -35.00                                / CCD cooler temperature [deg C]		float interval (-50,50)				vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+SET-TEMP= -35.00                                   / CCD cooler setpoint [deg C]		N/A	netreba v DB
+XBINNING= 1                                                                     		integer interval (0,100)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+YBINNING= 1                                                                     		integer interval (0,100)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+XORGSUBF= 0                                                                     		integer interval (0,100000)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+YORGSUBF= 0                                                                     		integer interval (0,100000)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+XPIXSZ  = 24                                      / Image pixel width in microns		N/A						netreba v DB
+YPIXSZ  = 24                                     / Image pixel height in microns		N/A						netreba v DB
+MODE    = 1                                            / Camera readout mode 0-2		integer interval (0,5)				vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+GAIN    = 2.20                                                   / Gain [e-/ADU]		float interval (0, 100.00)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+RD_NOISE= 10.1                                              / Readout noise [e-]		float interval (0, 100.00)vlozit do DB, 	Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+RBI_CNT = 0                                              / Number of RBI flushes		N/A						netreba v DB
+RBI_TIME= 0.00                                            / RBI flood time [sec]		N/A						netreba v DB
+OBSERVER= 'M.Zigo  '                                                            		String dlzka (0,30)				vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat
+INSTRUME= 'CCD camera FLI ProLine PL1001'                                       		N/A						netreba v DB
+TELESCOP= 'Reflector 0.70-m/f4.2'            / TELESCOP= 'Reflector 0.70-m/f4.2'		N/A						netreba v DB
+ORIGIN  = 'Astronomical Observatory of Comenius University, Modra (118)'        		N/A						netreba v DB
+RA      = '13:58:31.95'              / Image center Ra, solved by Astrometry.net		float interval (0, 360.00)			vlozit do DB, Keyword a hodnota nie vzdy existuje treba osetrit ak neexistuje, parameter podla ktoreho budeme filtrovat	format uhla HH:MM:SS treba previest na decimalne stupne
+DEC     = '+4:55:17.4'              / Image center Dec, solved by Astrometry.net		float interval (-90.00, 90.00)			vlozit do DB, Keyword a hodnota nie vzdy existuje treba osetrit ak neexistuje, parameter podla ktoreho budeme filtrovat	format uhla DD:MM:SS treba previest na decimalne stupne
+RA_ENC  = -3653.499                              / Encoder count, at midexposure		N/A						netreba v DB
+DEC_ENC = -656.200                               / Encoder count, at midexposure		N/A						netreba v DB
+RA_PNT  = '209.644419'                                         / Right ascension		float interval (0, 360.00)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat (Suradnice ktore treba nasledne plotnut do mapy pokrytia oblohy)
+DEC_PNT = '4.917544'                                               / Declination		float interval (-90.00, 90.00)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat (Suradnice ktore treba nasledne plotnut do mapy pokrytia oblohy)
+AZIMUTH = '128.704 '                                          / Encoders azimuth		float interval (0, 360.00)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat 
+ELEVATIO= '34.7022 '                                        / Encoders elevation		float interval (-90.00, 90.00)			vlozit do DB, Keyword a hodnota vzdy existuje, parameter podla ktoreho budeme filtrovat 
+AIRMASS = '1.75651 '                                     / Airmass (1/cos(90-el)		float interval (1, 1000.000)			vlozit do DB, Keyword a hodnota nie vzdy existuje treba osetrit ak neexistuje, parameter podla ktoreho budeme filtrovat 
+HA_APP  = '-9.45938'                                       / Apparent hour angle		N/A						netreba v DB 
+DEC_APP = '64.8697 '                                      / Apparent declination		N/A						netreba v DB
+SITEID  = '118     '                                                   / Site ID		N/A						netreba v DB
+PIXSCALE= '1.67    '                                               / Pixel scale		N/A						netreba v DB
+RDNOISE = '10.1    '                                            / Read-out noise		N/A						netreba v DB
+UTSTART = '19:24:30'                                                  / UT start		N/A						netreba v DB
+RATRACK = '10.626464'                        / Offset RA tracking in arc-sec/sec		float interval (0, 1000000.00)			vlozit do DB, Keyword a hodnota nie vzdy existuje treba osetrit ak neexistuje, parameter podla ktoreho budeme filtrovat 
+DECTRACK= '-6.184758'                       / Offset DEC tracking in arc-sec/sec		float interval (0, 1000000.00)			vlozit do DB, Keyword a hodnota nie vzdy existuje treba osetrit ak neexistuje, parameter podla ktoreho budeme filtrovat 
+PHASE   = '8.853246'                                               / Phase angle		float interval (0, 180.00)			vlozit do DB, Keyword a hodnota nie vzdy existuje treba osetrit ak neexistuje, parameter podla ktoreho budeme filtrovat 
+RANGE   = '29919830.152602'                                / Range from observer		float interval (0, 1e27)			vlozit do DB, Keyword a hodnota nie vzdy existuje treba osetrit ak neexistuje, parameter podla ktoreho budeme filtrovat 
+COMMENT                                                                       		OSTATNE KEYWORDY NIZSIE NETREBA V DB
+COMMENT Astrometry.net WCS solution:                                          
+COMMENT                                                                       
+WCSAXES = 2                                                         / no comment
+CTYPE1  = 'RA---TAN-SIP'             / TAN (gnomic) projection + SIP distortions
+CTYPE2  = 'DEC--TAN-SIP'             / TAN (gnomic) projection + SIP distortions 
+EQUINOX = 2000.0                        / Equatorial coordinates definition (yr) 
+LONPOLE = 180.0                                                     / no comment 
+LATPOLE = 0.0                                                       / no comment 
+CRVAL1  = 209.786407548                                 / RA  of reference point 
+CRVAL2  = 5.07237391646                                 / DEC of reference point 
+CRPIX1  = 179.097243309                                      / X reference pixel 
+CRPIX2  = 192.487342119                                      / Y reference pixel 
+CUNIT1  = 'deg     '                                       / X pixel scale units 
+CUNIT2  = 'deg     '                                       / Y pixel scale units 
+CD1_1   = -0.000464937213145                             / Transformation matrix 
+CD1_2   = 7.0625937973E-06                                          / no comment 
+CD2_1   = -6.2274941916E-06                                         / no comment 
+CD2_2   = -0.000464817376481                                        / no comment 
+IMAGEW  = 1024                                        / Image width,  in pixels. 
+IMAGEH  = 1024                                        / Image height, in pixels. 
+A_ORDER = 2                                           / Polynomial order, axis 1 
+A_0_0   = 0                                                         / no comment 
+A_0_1   = 0                                                         / no comment 
+A_0_2   = 1.18013578197E-06                                         / no comment 
+A_1_0   = 0                                                         / no comment 
+A_1_1   = -2.71127839069E-07                                        / no comment 
+A_2_0   = -1.09949681734E-06                                        / no comment 
+B_ORDER = 2                                           / Polynomial order, axis 2 
+B_0_0   = 0                                                         / no comment 
+B_0_1   = 0                                                         / no comment 
+B_0_2   = -1.34895034113E-07                                        / no comment 
+B_1_0   = 0                                                         / no comment 
+B_1_1   = 1.14685769799E-06                                         / no comment 
+B_2_0   = -1.40164808501E-07                                        / no comment 
+AP_ORDER= 2                                       / Inv polynomial order, axis 1 
+AP_0_0  = -3.12256407918E-05                                        / no comment 
+AP_0_1  = 3.74554966622E-08                                         / no comment 
+AP_0_2  = -1.18067559011E-06                                        / no comment 
+AP_1_0  = -4.60875808017E-07                                        / no comment 
+AP_1_1  = 2.71436904205E-07                                         / no comment 
+AP_2_0  = 1.10203470182E-06                                         / no comment 
+BP_ORDER= 2                                       / Inv polynomial order, axis 2 
+BP_0_0  = -3.43035567528E-05                                        / no comment 
+BP_0_1  = 4.0420801681E-08                                          / no comment 
+BP_0_2  = 1.35859026694E-07                                         / no comment 
+BP_1_0  = -5.01343694902E-08                                        / no comment 
+BP_1_1  = -1.14745396616E-06                                        / no comment 
+BP_2_0  = 1.40365477235E-07                                         / no comment 
+HISTORY Created by the Astrometry.net suite.                                     
+HISTORY For more details, see http://astrometry.net.                             
+HISTORY Git URL https://github.com/dstndstn/astrometry.net                       
+HISTORY Git revision 0.77                                                        
+HISTORY Git date Fri_Feb_22_13:32:27_2019_+0000                                  
+HISTORY This WCS header was created by the program "blind".                      
+END                                                                               
