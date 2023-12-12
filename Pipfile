@@ -5,10 +5,10 @@ name = "pypi"
 
 [packages]
 django = "*"
-psycopg = "*"
-psycopg-binary = "*"
+psycopg2 = "*"
 
 [dev-packages]
+pre-commit = "*"
 
 [requires]
 python_version = "3.12"
