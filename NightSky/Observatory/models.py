@@ -3,12 +3,14 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class FITS_Image(models.Model):
+    ID = models.IntegerField(primary_key=True)
     NAXIS = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)])
     NAXIS1 = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100000)])
     NAXIS2 = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100000)])
     IMAGETYP = models.CharField(max_length=10)
     FILTER = models.CharField(max_length=3)
-    OBJECT = models.CharField(max_length=100)
+    OBJECT_NAME = models.CharField(max_length=100)
+    SERIES = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
     NOTES = models.CharField(max_length=1000)
     DATE_OBS = models.CharField(max_length=23)
     MJD_OBS = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(100000.00000000)])
@@ -33,4 +35,4 @@ class FITS_Image(models.Model):
     DECTRACK = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(1000000.00)])
     PHASE = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(180.00)])
     RANGE = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(1e27)])
-
+    PATH = models.CharField(max_length=300)

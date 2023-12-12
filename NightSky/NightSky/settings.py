@@ -78,9 +78,9 @@ WSGI_APPLICATION = 'NightSky.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'NightSky_database',
+        'NAME': 'fits_images',
         'USER': 'postgres',
-        'PASSWORD': 'your_password',
+        'PASSWORD': 'password',
         'HOST': 'localhost',
         'PORT': '5432',
     }
