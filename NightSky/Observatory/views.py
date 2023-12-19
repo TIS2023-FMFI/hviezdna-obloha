@@ -15,7 +15,7 @@ def import_fits(request):
         form = DirectoryForm(request.POST)
         if form.is_valid():
             directory_path = form.cleaned_data['directory_path']
-            directory_path = 'C:/Users/anna4/Documents/20230503/' + directory_path[15:]
+            directory_path = 'C:/Users/anna4/Documents/20230503/' + directory_path[15:] #change to your path to fits images
             p = Parsing(directory_path)
             result = execute_query(str(p))
     else:
@@ -25,19 +25,6 @@ def import_fits(request):
 
 def export_fits(request):
     return render(request, 'Observatory/export_fits.html')
-
-
-# def directory_path_view(request):
-#     result = ''
-#     if request.method == 'POST':
-#         form = DirectoryForm(request.POST)
-#         if form.is_valid():
-#             directory_path = form.cleaned_data['file_path']
-#             p = Parsing(directory_path)
-#             result = execute_query(str(p))
-#     else:
-#         form = DirectoryForm()
-#     return render(request, 'Observatory/import_fits.html', {'form': form, 'result': result})
 
 
 def execute_query(query):

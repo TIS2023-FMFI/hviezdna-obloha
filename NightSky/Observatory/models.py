@@ -3,7 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class FITS_Image(models.Model):
-    ID = models.IntegerField(primary_key=True)
+    ID = models.AutoField(primary_key=True)
     NAXIS = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)])
     NAXIS1 = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100000)])
     NAXIS2 = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100000)])
@@ -36,3 +36,8 @@ class FITS_Image(models.Model):
     PHASE = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(180.00)])
     RANGE = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(1e27)])
     PATH = models.CharField(max_length=300)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['DATE_OBS'], name="unique_by_DATE_OBS")
+        ]
