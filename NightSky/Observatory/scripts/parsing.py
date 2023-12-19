@@ -13,16 +13,22 @@ class Parsing:
         self.add_all_images(path)
 
     def add_all_images(self, path):
+        print(repr(path))
         for image in os.listdir(path):
-            self.QUERY += str(Values(path + image, self.PARAMETERS))
+            self.QUERY += str(Values(path + '/' + image, self.PARAMETERS))
             self.QUERY += ',\n'
         self.QUERY = self.QUERY[:-2]
         self.QUERY += ';'
 
     def start_query(self):
-        self.QUERY = 'INSERT INTO fits_images ('
-        for param in self.PARAMETERS:
-            self.QUERY += param + ', '
+        self.QUERY = 'INSERT INTO \"Observatory_fits_image\" ('
+        param_insert = self.PARAMETERS
+        for param in param_insert:
+            if '-' in param:
+                param = param.replace('-', '_')
+            if param == 'OBJECT':
+                param = 'OBJECT_NAME'
+            self.QUERY += '\"' + param + '\", '
         self.QUERY = self.QUERY[:-2] + ') \nVALUES '
 
     def __str__(self):
@@ -52,6 +58,8 @@ class Values:
                 self.values_add_value(self.split_object()[0])
             elif param == 'SERIES':
                 self.values_add_value(self.split_object()[1])
+            elif param == 'RA' or param == 'DEC':
+                self.try_add(param + '_PNT')
             else:
                 self.try_add(param)
             self.values_add_syntax(', ')
@@ -60,7 +68,11 @@ class Values:
 
     def try_add(self, param):
         try:
-            self.values_add_value(str(self.header[param]))
+            value = str(self.header[param])
+            if param == 'NOTES' and value == '':
+                self.values_add_value(' ')
+            else:
+                self.values_add_value(value)
         except KeyError:
             self.values_add_syntax('NULL')
 
@@ -68,7 +80,10 @@ class Values:
         return str(self.header['OBJECT']).split('_')
 
     def values_add_value(self, value):
-        self.VALUES += '\"' + value + '\"'
+        if value == '':
+            self.VALUES += 'NULL'
+        else:
+            self.VALUES += '\'' + value + '\''
 
     def values_add_syntax(self, syntax):
         self.VALUES += syntax
