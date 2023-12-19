@@ -26,9 +26,8 @@
         <article class="content_part">
             <form method="post" action="{% url 'import_fits' %}">
                 {% csrf_token %}
+                <h3>{{ form.directory_path.label_tag }}</h3><br>
                 {{ form.directory_path }}
-                <label for="id_file_path">Directory path</label><br>
-                <input type="text" id="id_file_path" name="file_path" placeholder="File path">
 
                 <input type="file" id="file-browse" webkitdirectory style="display: none;" onchange="updateInputWithPath(this)">
                 <button type="button" onclick="document.getElementById('file-browse').click()">Browse</button>
@@ -41,10 +40,11 @@
                 if (files.length) {
                     const directoryName = files[0].webkitRelativePath.split('/')[0];
                     // updates the input field with the hardcoded path and the selected directory name
-                    document.getElementById('id_file_path').value = 'Hardcoded_path\\' + directoryName;
+                    document.getElementById('directory_path').value = 'Hardcoded_path\\' + directoryName;
                 }
             }
             </script>
+
         </article>
     </div>
 </body>
