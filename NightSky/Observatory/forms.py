@@ -1,6 +1,6 @@
 from django import forms
 
 
-class ImportFITSForm(forms.Form):
-    directory_path = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Enter directory path containing '
-                                                                                  'FITS files'}))
+class DirectoryForm(forms.Form):
+    directory_path = forms.CharField(widget=forms.TextInput(attrs={'class': 'input-class', 'placeholder': 'File path'}),
+                                     required=True)
