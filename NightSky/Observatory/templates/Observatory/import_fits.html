@@ -24,15 +24,27 @@
             <h3>Last Night File Path</h3>
         </article>
         <article class="content_part">
-            <form id="importForm">
-              <label for="filePath">File path</label><br>
-              <input type="text" id="filePath" name="filePath">
+            <form method="post" action="{% url 'import_fits' %}">
+                {% csrf_token %}
+                {{ form.directory_path }}
+                <label for="id_file_path">Directory path</label><br>
+                <input type="text" id="id_file_path" name="file_path" placeholder="File path">
 
-              <input type="file" id="fileBrowser" style="display: none;" accept="" onchange="updateFilePath()">
-              <button type="button" onclick="document.getElementById('fileBrowser').click()">BROWSE</button>
-
-              <input type="submit" value="IMPORT">
+                <input type="file" id="file-browse" webkitdirectory style="display: none;" onchange="updateInputWithPath(this)">
+                <button type="button" onclick="document.getElementById('file-browse').click()">Browse</button>
+                <input type="submit" value="Import">
             </form>
+
+            <script>
+            function updateInputWithPath(input) {
+                const files = input.files;
+                if (files.length) {
+                    const directoryName = files[0].webkitRelativePath.split('/')[0];
+                    // updates the input field with the hardcoded path and the selected directory name
+                    document.getElementById('id_file_path').value = 'Hardcoded_path\\' + directoryName;
+                }
+            }
+            </script>
         </article>
     </div>
 </body>
