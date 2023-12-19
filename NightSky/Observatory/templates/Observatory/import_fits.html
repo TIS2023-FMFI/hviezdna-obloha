@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charon's Little Helper - Import Fits</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <header class="title_a_navbar">
+        <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
+        <nav>
+            <a href="{% url 'import_fits' %}">Import Images</a>
+            <a href="{% url 'export_fits' %}">Export Images</a>
+        </nav>
+    </header>
+    <div class="contents">
+        <article class="content_part">
+            <h2>Import Fits Images</h2>
+        </article>
+        <article class="content_part">
+            <h3>Last Night File Path</h3>
+        </article>
+        <article class="content_part">
+            <form id="importForm">
+              <label for="filePath">File path</label><br>
+              <input type="text" id="filePath" name="filePath">
+
+              <input type="file" id="fileBrowser" style="display: none;" accept="" onchange="updateFilePath()">
+              <button type="button" onclick="document.getElementById('fileBrowser').click()">BROWSE</button>
+
+              <input type="submit" value="IMPORT">
+            </form>
+        </article>
+    </div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charon's Little Helper - Import Fits</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="title_a_navbar">
+        <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
+        <nav>
+            <a href="{% url 'import_fits' %}">Import Images</a>
+            <a href="{% url 'export_fits' %}">Export Images</a>
+        </nav>
+    </div>
+    <h2>
+        Export FITS Images
+    </h2>
+    <div>
+        File Path
+    </div>
+    <div>
+        SQL Query
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="" name="">
+            <button type="submit">Apply filter</button>
+        </form>
+    </div>
+</body>
+</html>
