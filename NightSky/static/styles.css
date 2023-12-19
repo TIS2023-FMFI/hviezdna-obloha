@@ -1,0 +1,53 @@
+body {
+    background: url("background.jpg") no-repeat fixed center;
+    background-size: cover;
+    color: aliceblue;
+    margin: 0;
+}
+
+.title_a_navbar {
+    background: rgba(36, 32, 40, 0.75);
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    border-radius: 0 0 10px 10px;
+}
+
+.contents {
+    margin: 3em 5em;
+}
+
+.content_part {
+    background: rgba(44, 41, 52, 0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+}
+
+h1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+h2 , h3{
+    margin: 0;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 50px;
+    padding: 25px 50px;
+    position: relative;
+}
+
+nav a {
+    font-size: 18px;
+}
+
+a {
+    text-decoration: none;
+    color: aliceblue;
+}
