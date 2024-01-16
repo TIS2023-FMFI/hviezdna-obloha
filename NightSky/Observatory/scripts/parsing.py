@@ -13,7 +13,6 @@ class Parsing:
         self.add_all_images(path)
 
     def add_all_images(self, path):
-        print(repr(path))
         for image in os.listdir(path):
             self.QUERY += str(Values(path + '/' + image, self.PARAMETERS))
             self.QUERY += ',\n'
@@ -56,7 +55,7 @@ class Values:
         for param in self.parameters[:-1]:
             if param == 'OBJECT':
                 self.values_add_value(self.split_object()[0])
-            elif param == 'SERIES':
+            elif param == 'SERIES' and '_' in self.header['OBJECT']:
                 self.values_add_value(self.split_object()[1])
             elif param == 'RA' or param == 'DEC':
                 self.try_add(param + '_PNT')

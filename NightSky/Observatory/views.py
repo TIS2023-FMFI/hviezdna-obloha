@@ -15,7 +15,7 @@ def import_fits(request):
         form = DirectoryForm(request.POST)
         if form.is_valid():
             directory_path = form.cleaned_data['directory_path']
-            directory_path = 'C:/Users/anna4/Documents/20230503/' + directory_path[15:] #change to your path to fits images
+            directory_path = 'D:/' + directory_path[15:] #change to your path to fits images instead of 'D:/'
             p = Parsing(directory_path)
             result = execute_query(str(p))
     else:
