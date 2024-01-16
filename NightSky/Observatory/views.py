@@ -3,6 +3,7 @@ import django.db.utils
 from django.shortcuts import render
 from .scripts.parsing import Parsing
 from django.db import connection
+from .models import FITS_Image
 
 
 def home(request):
@@ -38,3 +39,27 @@ def execute_query(query):
 
 def export_fits(request):
     return render(request, 'Observatory/export_fits.html')
+
+
+def number_of_nights(request):
+    nights = FITS_Image.objects.values('DATE_OBS').distinct().count()
+    return render(request, 'Observatory/home.html', {'nights': nights})
+
+def number_of_frames(request):
+    frames =  FITS_Image.objects.latest('ID').ID
+    return render(request, 'Observatory/home.html', {'frames': frames})
+
+def last_light_frames_night(request):
+    light_frames = FITS_Image.objects.filter(IMAGETYP='light').latest('ID').DATE_OBS
+    return render(request, 'Observatory/home.html', {'light_frames': light_frames})
+
+
+def last_calib_frames_night(request):
+    calib_frames = FITS_Image.objects.filter(IMAGETYP='calib').latest('ID').DATE_OBS
+    return render(request, 'Observatory/home.html', {'calib_frames': calib_frames})
+
+
+def last_CCD_temperature(request):
+    last_fits_image = FITS_Image.objects.latest('ID')
+    CCD_temp = last_fits_image.CCD_TEMP
+    return render(request, 'Observatory/home.html', {'CCD_temp': CCD_temp})
