@@ -7,6 +7,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Charon's Little Helper</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+
+    <style>
+        #statistics {
+            margin-top: 20px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        h2 {
+            text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+        }
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 10px auto;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: BLACK;
+        }
+
+    </style>
+
 </head>
 <body>
     <div class="title_a_navbar">
@@ -19,6 +46,29 @@
     <div id="map">
     </div>
     <div id="statistics">
+        <h2>Statistics</h2>
+        <table>
+                <tr>
+                    <td>Number of Nights</td>
+                    <td>{{ nights }}</td>
+                </tr>
+                <tr>
+                    <td>Number of Frames</td>
+                    <td>{{ frames }}</td>
+                </tr>
+                <tr>
+                    <td>Last Light Frames Night</td>
+                    <td>{{ light_frames }}</td>
+                </tr>
+                <tr>
+                    <td>Last Calib Frames Night</td>
+                    <td>{{ calib_frames }}</td>
+                </tr>
+                <tr>
+                    <td>Last CCD Temperature</td>
+                    <td>{{ CCD_temp }}</td>
+                </tr>
+        </table>
     </div>
 </body>
 </html>
