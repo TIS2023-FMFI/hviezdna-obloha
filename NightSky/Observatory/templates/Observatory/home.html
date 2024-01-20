@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Charon's Little Helper</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
 
     <style>
@@ -46,43 +47,139 @@
     </div>
     <div class="contents">
         <article class="content_part">
-            <!-- render the map -->
-            <svg width="960" height="500" id="sky-map"></svg>
+            <article id="sky-map"></article>
             <script>
                 // parse JSON data
                 var skyCoverageData = JSON.parse('{{ sky_coverage_json|safe }}');
                 console.log(skyCoverageData);
 
-                // set up the width, height, and margins for the SVG canvas
-                var width = 930, height = 500, radius = height / 2;
+                // define the view size of the SVG
+                var width = 960;  // these are arbitrary; set them to your preferred default size
+                var height = 500;
 
-                // create an SVG element within the div with id 'sky-map'
-                var svg = d3.select("#sky-map")
-                            .attr("width", width)
-                            .attr("height", height)
-                            .append("g")
-                            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+                // create the SVG canvas
+                const svg = d3.select("#sky-map").append("svg")
+                    .attr("viewBox", `0 0 ${width} ${height}`)
+                    .attr("preserveAspectRatio", "xMidYMid meet")
+                    .classed("svg-content-responsive", true)
+                    .style("background-color", "white");
 
-                // define the Aitoff projection
-                var projection = d3.geoAitoff().scale(radius).translate([0, 0]);
+                var zoom = d3.zoom()
+                    .scaleExtent([1, 10])
+                    .translateExtent([[0, 0], [width, height]])
+                    .on("zoom", zoomed);
 
-                // define the path generator using the Aitoff projection
-                var path = d3.geoPath().projection(projection);
+                // apply zoom to the SVG
+                svg.call(zoom);
 
-                // add a path for each data point
-                svg.selectAll("path")
-                    .data(skyCoverageData)
-                    .enter()
-                    .append("path")
-                    .attr("d", function(d) {
-                        // convert the RA and DEC to the format needed by the projection
-                        var coords = [d.ra - 180, -d.dec]; // adjust RA and invert DEC
-                        return path({type: "Point", coordinates: coords});
-                    })
-                    .attr("fill", "steelblue")
-                    .attr("stroke", "#fff")
-                    .attr("stroke-width", "0.5");
+
+                // holds elements we want to zoom
+                var g = svg.append("g");
+
+                // define Aitoff projection
+                const projection = d3.geoAitoff()
+                    .translate([width / 2, height / 2])
+                    .scale(width / (2 * Math.PI) - 15);
+
+                // define path generator
+                const path = d3.geoPath().projection(projection);
+
+                // define the graticule
+                const graticule = d3.geoGraticule()
+                    .stepMinor([45, 30]) // adjust this to control the density of grid lines
+                    .extent([[-180, -90], [180, 90]]); // full extent of longitude and latitude
+
+                // draw the graticule
+                g.append("path")
+                    .datum(graticule)
+                    .attr("class", "graticule")
+                    .attr("d", path)
+                    .style("fill", "none")
+                    .style("stroke", "black")
+                    .style("stroke-width", "0.5")
+                    .style("stroke-dasharray", "2,2");
+
+                // define and draw the central meridian and equator with solid lines
+                const centralLineData = d3.geoGraticule()
+                    .stepMajor([180, 90])  // This will generate only the equator and central meridian
+                    .stepMinor([0, 0]);
+
+                g.append("path")
+                    .datum(centralLineData)
+                    .attr("class", "central-lines")
+                    .attr("d", path)
+                    .style("fill", "none")
+                    .style("stroke", "black")
+                    .style("stroke-width", "1px");
+
+                // draw the outline of the projection
+                g.append("path")
+                    .datum({ type: "Sphere" })
+                    .attr("class", "graticule-outline")
+                    .attr("d", path)
+                    .style("fill", "none")
+                    .style("stroke", "black")
+                    .style("stroke-width", "1px");
+
+                // longitude degree markers
+                const longitudes = d3.range(-180, 181, 45);
+                longitudes.forEach((longitude) => {
+                    g.append("text")
+                      .attr("class", "longitude-label")
+                      .attr("x", projection([longitude, 0])[0])
+                      .attr("y", projection([longitude, 0])[1])
+                      .attr("dy", "1.5em") // Offset the text below the equator
+                      .style("text-anchor", "middle")
+                      .text(`${longitude}°`);
+                });
+
+                // latitude degree markers
+                const latitudes = d3.range(-90, 91, 30);
+                latitudes.forEach((latitude) => {
+                  if (latitude !== 0) { // skip equator so you dont overlap with the 0 from longitudes
+                    g.append("text")
+                      .attr("class", "latitude-label")
+                      .attr("x", projection([0, latitude])[0])
+                      .attr("y", projection([0, latitude])[1])
+                      .attr("dy", latitude < 0 ? "0em" : "1.5em")
+                      .style("text-anchor", "middle")
+                      .text(`${latitude}°`);
+                  }
+                });
+
+                svg.selectAll(".longitude-label, .latitude-label")
+                    .style("font-family", "sans-serif")
+                    .style("font-size", "10px")
+                    .style("paint-order", "stroke")
+                    .style("stroke", "white")
+                    .style("stroke-width", "1.5px")
+                    .style("stroke-linecap", "butt")
+                    .style("stroke-linejoin", "miter")
+                    .style("fill", "black");
+
+                skyCoverageData.forEach(function(d) {
+                    var ra = d.ra - 180;
+                    var dec = d.dec;
+                    var coordinates = projection([ra, dec]);
+
+                    if (coordinates[0] && coordinates[1]) {
+                        // circle to the SVG for each data point
+                        g.append("circle")
+                            .attr("cx", coordinates[0])
+                            .attr("cy", coordinates[1])
+                            .attr("r", 2) // radius of the circle
+                            .style("fill", "red")
+                            .style("opacity", 0.7);
+                    }
+                });
+
+                function zoomed(event) {
+                    g.attr("transform", event.transform);
+                }
+
             </script>
+
+
         </article>
     </div>
     </div>

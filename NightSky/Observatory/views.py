@@ -7,51 +7,30 @@ from .scripts.parsing import Parsing
 from django.db import connection
 from .models import FITS_Image
 
-# rough estimate - needs to be adjusted
-SCALE_SMALL_TELESCOPE = 1.5  # arcseconds per pixel for a small telescope
-SCALE_MID_TELESCOPE = 0.8  # arcseconds per pixel for a mid-sized telescope
-
-
-def calculate_fov(naxis1, naxis2, xbinning, ybinning, scale):
-    # calculate field of view
-    fov_x = naxis1 * xbinning * scale / 3600  # arcseconds to degrees
-    fov_y = naxis2 * ybinning * scale / 3600
-    return fov_x, fov_y
-
 
 def home(request):
-    fits_images = FITS_Image.objects.all().values(
-        'RA',
-        'DEC',
-        'NAXIS1',
-        'NAXIS2',
-        'XBINNING',
-        'YBINNING'
-    )
-
-    # process the query result to calculate FOV and prepare the data for the frontend
-    # sky_coverage_data contains the data needed for the frontend to plot the coverage map
-    sky_coverage_data = []
-    for image in fits_images:
-        fov_x, fov_y = calculate_fov(
-            image['NAXIS1'],
-            image['NAXIS2'],
-            image['XBINNING'],
-            image['YBINNING'],
-            SCALE_SMALL_TELESCOPE
+    try:
+        fits_images = FITS_Image.objects.all().values(
+            'RA',
+            'DEC'
         )
-        sky_coverage_data.append({
-            'ra': image['RA'],
-            'dec': image['DEC'],
-            'fov_x': fov_x,
-            'fov_y': fov_y
-        })
 
-    # sky coverage data --> JSON
-    sky_coverage_json = json.dumps(sky_coverage_data, cls=DjangoJSONEncoder)
+        # process the query result to calculate FOV and prepare the data for the frontend
+        # sky_coverage_data contains the data needed for the frontend to plot the coverage map
+        sky_coverage_data = []
+        for image in fits_images:
+            sky_coverage_data.append({
+                'ra': image['RA'],
+                'dec': image['DEC']
+            })
 
-    # pass the sky_coverage_json to the template
-    return render(request, 'Observatory/home.html', {'sky_coverage_json': sky_coverage_json})
+        # sky coverage data --> JSON
+        sky_coverage_json = json.dumps(sky_coverage_data, cls=DjangoJSONEncoder)
+
+        # pass the sky_coverage_json to the template
+        return render(request, 'Observatory/home.html', {'sky_coverage_json': sky_coverage_json})
+    except Exception:
+        return render(request, 'Observatory/home.html')
 
 
 def import_fits(request):
@@ -60,7 +39,7 @@ def import_fits(request):
         form = DirectoryForm(request.POST)
         if form.is_valid():
             directory_path = form.cleaned_data['directory_path']
-            directory_path = 'D:/' + directory_path[15:]  # change to your path to fits images instead of 'D:/'
+            directory_path = 'C:/Users/adamo/Downloads/' + directory_path[15:]
             p = Parsing(directory_path)
             result = execute_query(str(p))
     else:
@@ -79,10 +58,6 @@ def execute_query(query):
             return 'DONE'
         except django.db.utils.IntegrityError:
             return 'Already in database'
-
-
-def export_fits(request):
-    return render(request, 'Observatory/export_fits.html')
 
 
 def number_of_nights(request):
