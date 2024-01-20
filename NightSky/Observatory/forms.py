@@ -41,5 +41,3 @@ class ExportForm(forms.Form):
     DECTRACK = forms.BooleanField(label='Dectrack', required=False)
     PHASE = forms.BooleanField(label='Phase', required=False)
     RANGE = forms.BooleanField(label='Range', required=False)
-
-

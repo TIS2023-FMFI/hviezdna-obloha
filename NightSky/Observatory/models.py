@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-class FITS_Image(models.Model):
+class FitsImage(models.Model):
     ID = models.AutoField(primary_key=True)
     NAXIS = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)])
     NAXIS1 = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100000)])
