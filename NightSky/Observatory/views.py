@@ -1,4 +1,5 @@
 from .forms import DirectoryForm
+from .forms import ExportForm
 import django.db.utils
 from django.shortcuts import render
 from .scripts.parsing import Parsing
@@ -25,7 +26,14 @@ def import_fits(request):
 
 
 def export_fits(request):
-    return render(request, 'Observatory/export_fits.html')
+    if request.method == 'POST':
+        form = ExportForm(request.POST)
+        if form.is_valid():
+            # process form data
+            pass
+    else:
+        form = ExportForm()
+    return render(request, 'Observatory/export_fits.html',  {'form': form})
 
 
 def execute_query(query):
@@ -36,9 +44,6 @@ def execute_query(query):
         except django.db.utils.IntegrityError:
             return 'Already in database'
 
-
-def export_fits(request):
-    return render(request, 'Observatory/export_fits.html')
 
 
 def number_of_nights(request):
@@ -63,3 +68,5 @@ def last_CCD_temperature(request):
     last_fits_image = FITS_Image.objects.latest('ID')
     CCD_temp = last_fits_image.CCD_TEMP
     return render(request, 'Observatory/home.html', {'CCD_temp': CCD_temp})
+
+
