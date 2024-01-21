@@ -9,12 +9,13 @@
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
 
     <style>
-
+        #textbox{
+            margin: 10px;
+        }
         #export {
             margin-top: 20px;
             text-align: center;
         }
-
         #ExportForm {
             padding: 20px;
             border-radius: 20px;
@@ -54,29 +55,22 @@
         {% csrf_token %}
         <div class="checkbox-container">
             {% for field in form %}
-                <label><input type="checkbox" name="{{ field.name }}" onclick="updateCheckedNames(this)"> {{ field.label }}</label>
+                 <label><input type="checkbox" name="{{ field.name }}" {% if form.initial.checked and field.name in form.initial.checked %}checked{% endif %}> {{ field.label }}</label>
             {% endfor %}
+        <button type="submit">Submit</button>
         </div>
 
     </form>
 
-    <div id="checked-names"></div>
-
-     <script>
-        function updateCheckedNames(checkbox) {
-            var checkedNamesDiv = document.getElementById('checked-names');
-            var label = checkbox.parentNode.textContent.trim(); // Get the label text
-
-            if (checkbox.checked) {
-                // Append the checked checkbox
-                checkedNamesDiv.innerHTML += '<p>' + label + '</p>';
-            } else {
-                // Remove the unchecked checkbox
-                var regex = new RegExp('<p>' + label + '<\/p>', 'g');
-                checkedNamesDiv.innerHTML = checkedNamesDiv.innerHTML.replace(regex, '');
-            }
-        }
-    </script>
+    <div id="checked">
+    {% if checked %}
+        <ul>
+             {% for field in checked %}
+               <div id ="textbox"> <input type="text" name="{{ field }}_textbox" placeholder="{{ field }}" ></div>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    </div>
 
 
     <div>

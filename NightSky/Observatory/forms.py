@@ -41,3 +41,8 @@ class ExportForm(forms.Form):
     DECTRACK = forms.BooleanField(label='Dectrack', required=False)
     PHASE = forms.BooleanField(label='Phase', required=False)
     RANGE = forms.BooleanField(label='Range', required=False)
+
+    def __init__(self, *args, **kwargs):
+         super().__init__(*args, **kwargs)
+         for field_name, field in self.fields.items():
+             self.fields[field_name].widget.attrs['class'] = 'checkbox-input'
