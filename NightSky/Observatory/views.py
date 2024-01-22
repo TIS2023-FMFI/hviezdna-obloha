@@ -1,5 +1,6 @@
 import json
 from .forms import DirectoryForm
+from .forms import ExportForm
 import django.db.utils
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render
@@ -48,7 +49,14 @@ def import_fits(request):
 
 
 def export_fits(request):
-    return render(request, 'Observatory/export_fits.html')
+    if request.method == 'POST':
+        form = ExportForm(request.POST)
+        if form.is_valid():
+            # process form data
+            pass
+    else:
+        form = ExportForm()
+    return render(request, 'Observatory/export_fits.html',  {'form': form})
 
 
 def execute_query(query):
