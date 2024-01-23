@@ -9,17 +9,20 @@
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
 
     <style>
-        #textbox{
+        #textbox {
             margin: 10px;
         }
+
         #export {
             margin-top: 20px;
             text-align: center;
         }
+
         #ExportForm {
             padding: 20px;
             border-radius: 20px;
         }
+
         .checkbox-container {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -35,54 +38,59 @@
             margin-bottom: 5px;
         }
     </style>
-
 </head>
+
 <body>
-    <div class="title_a_navbar">
-        <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
-        <nav>
-            <a href="{% url 'import_fits' %}">Import Images</a>
-            <a href="{% url 'export_fits' %}">Export Images</a>
-        </nav>
-    </div>
-    <div id="export">
+<div class="title_a_navbar">
+    <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
+    <nav>
+        <a href="{% url 'import_fits' %}">Import Images</a>
+        <a href="{% url 'export_fits' %}">Export Images</a>
+    </nav>
+</div>
+
+<div id="export">
     <h2>
         Export FITS Images
     </h2>
-    </div>
+</div>
 
-    <form method="post" id="ExportForm">
-        {% csrf_token %}
-        <div class="checkbox-container">
-            {% for field in form %}
-                 <label><input type="checkbox" name="{{ field.name }}" {% if form.initial.checked and field.name in form.initial.checked %}checked{% endif %}> {{ field.label }}</label>
-            {% endfor %}
-        <button type="submit">Submit</button>
+<script>
+    function appear(id) {
+        console.log("odfarbujem div-" + id)
+        document.getElementById("div-" + id).removeAttribute("hidden")
+    }
+</script>
+
+<form method="post" id="ExportForm" action="{% url 'export_fits' %}">
+    {% csrf_token %}
+    {{ form.errors }}
+
+    {% for field in form %}
+        <button type="button" onclick="appear('{{ field.auto_id }}')">{{ field.label }}</button>
+    {% endfor %}
+
+    {% for field in form %}
+        <div hidden="hidden" id="div-{{ field.auto_id }}">
+            <label>{{ field.label }}</label>
+            {{ field }}
         </div>
+    {% endfor %}
 
+    <button type="submit">Submit</button>
+</form>
+
+<div>
+    File Path
+</div>
+
+<div>
+    SQL Query
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button type="submit">Apply filter</button>
     </form>
-
-    <div id="checked">
-    {% if checked %}
-        <ul>
-             {% for field in checked %}
-               <div id ="textbox"> <input type="text" name="{{ field }}_textbox" placeholder="{{ field }}" ></div>
-            {% endfor %}
-        </ul>
-    {% endif %}
-    </div>
-
-
-    <div>
-        File Path
-    </div>
-    <div>
-        SQL Query
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="" name="">
-            <button type="submit">Apply filter</button>
-        </form>
-    </div>
+</div>
 </body>
+
 </html>
