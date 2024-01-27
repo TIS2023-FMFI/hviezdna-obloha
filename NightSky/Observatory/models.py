@@ -5,7 +5,9 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 class FitsImage(models.Model):
     ID = models.AutoField(primary_key=True)
     NAXIS = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(10)], blank=True, null=True
+        validators=[MinValueValidator(0), MaxValueValidator(10)],
+        blank=True,
+        null=True
     )
     NAXIS1 = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(100000)],
@@ -41,10 +43,14 @@ class FitsImage(models.Model):
         null=True,
     )
     XBINNING = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(100)], blank=True, null=True
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        blank=True,
+        null=True
     )
     YBINNING = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(100)], blank=True, null=True
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        blank=True,
+        null=True
     )
     XORGSUBF = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(100000)],
@@ -57,7 +63,9 @@ class FitsImage(models.Model):
         null=True,
     )
     MODE = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(5)], blank=True, null=True
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+        blank=True,
+        null=True
     )
     GAIN = models.FloatField(
         validators=[MinValueValidator(0), MaxValueValidator(100.00)],

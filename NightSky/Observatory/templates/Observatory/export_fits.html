@@ -56,28 +56,45 @@
 </div>
 
 <script>
+    <!-- appear nepoužívame -->
     function appear(id) {
         console.log("odfarbujem div-" + id)
         document.getElementById("div-" + id).removeAttribute("hidden")
+    }
+
+    function toggleVisibility(id) {
+        var checkbox = document.getElementById("checkbox-" + id);
+        var fieldDiv = document.getElementById("div-" + id);
+
+        if (checkbox.checked) {
+            fieldDiv.removeAttribute("hidden");
+        } else {
+            fieldDiv.setAttribute("hidden", "hidden");
+        }
     }
 </script>
 
 <form method="post" id="ExportForm" action="{% url 'export_fits' %}">
     {% csrf_token %}
     {{ form.errors }}
-
+    <div class="checkbox-container">
     {% for field in form %}
-        <button type="button" onclick="appear('{{ field.auto_id }}')">{{ field.label }}</button>
+        <label>
+            <input type="checkbox" id="checkbox-{{ field.auto_id }}" name="{{ field.name }}" value="{{ field.value }}" onchange="toggleVisibility('{{ field.auto_id }}')">
+            {{ field.label }}
+        </label>
+       <!-- <button type="button" onclick="appear('{{ field.auto_id }}')">{{ field.label }}</button> -->
     {% endfor %}
+    </div>
 
     {% for field in form %}
-        <div hidden="hidden" id="div-{{ field.auto_id }}">
+          <div hidden="hidden" id="div-{{ field.auto_id }}" style="margin: 10px">
             <label>{{ field.label }}</label>
             {{ field }}
         </div>
     {% endfor %}
 
-    <button type="submit">Submit</button>
+    <button type="submit" style="margin: 10px">Submit</button>
 </form>
 
 <div>

@@ -8,12 +8,11 @@ from .scripts.parsing import Parsing
 
 
 def home(request):
-    nights = 0  # FitsImage.objects.values('DATE_OBS').distinct().count()
-    frames = 0  # FitsImage.objects.latest('ID').ID
-    last_light_frame = 0  # FitsImage.objects.filter(IMAGETYP='light').latest('ID').DATE_OBS
-    calib_frames = 0  # FitsImage.objects.filter(IMAGETYP='calib').latest('ID').DATE_OBS
-    last_fits_image = 0  # FitsImage.objects.latest('ID')
-    ccd_temp = 0  # last_fits_image.CCD_TEMP
+    nights = number_of_nights(request)
+    frames = number_of_frames(request)
+    last_light_frame = last_light_frames_night(request)
+    calib_frames = last_calib_frames_night(request)
+    ccd_temp = last_ccd_temperature(request)
 
     context = {
         "nights": nights,
@@ -32,7 +31,7 @@ def import_fits(request):
         form = DirectoryForm(request.POST)
         if form.is_valid():
             directory_path = form.cleaned_data["directory_path"]
-            directory_path = "D:/" + directory_path[15:]  # change to your path to fits images instead of 'D:/'
+            directory_path = "D:/TIS/20230503/" + directory_path[15:]  # change to your path to fits images instead of 'D:/'
             parsing = Parsing(directory_path)
             result = execute_query(str(parsing))
     else:
@@ -44,11 +43,11 @@ def import_fits(request):
 def export_fits(request):  # TODO: REMOVE PRINTS
     if request.method == "POST":
         form = ExportForm(request.POST)
-        # print(form.data)
+        print(form.data)
 
         if form.is_valid():
             fit = form.save(commit=False)
-            # print(fit)
+            print(fit)
             FitsImage.objects.filter()
 
             return redirect("export_fits")
@@ -69,26 +68,37 @@ def execute_query(query):
 
 
 def number_of_nights(request):
-    nights = FitsImage.objects.values("DATE_OBS").distinct().count()
-    return render(request, "Observatory/home.html", {"nights": nights})
-
+    if FitsImage.objects.exists():
+        nights = FitsImage.objects.values("DATE_OBS").distinct().count()
+        return nights
+    else:
+        return 0
 
 def number_of_frames(request):
-    frames = FitsImage.objects.latest("ID").ID
-    return render(request, "Observatory/home.html", {"frames": frames})
-
+    if FitsImage.objects.exists():
+        frames = FitsImage.objects.latest("ID").ID
+        return frames
+    else:
+        return 0
 
 def last_light_frames_night(request):
-    light_frames = FitsImage.objects.filter(IMAGETYP="light").latest("ID").DATE_OBS
-    return render(request, "Observatory/home.html", {"light_frames": light_frames})
-
+    if FitsImage.objects.exists():
+        light_frames = FitsImage.objects.filter(IMAGETYP="light").latest("ID").DATE_OBS
+        return light_frames
+    else:
+        return 0
 
 def last_calib_frames_night(request):
-    calib_frames = FitsImage.objects.filter(IMAGETYP="calib").latest("ID").DATE_OBS
-    return render(request, "Observatory/home.html", {"calib_frames": calib_frames})
-
+    if FitsImage.objects.exists():
+        calib_frames = FitsImage.objects.filter(IMAGETYP="calib").latest("ID").DATE_OBS
+        return calib_frames
+    else:
+        return 0
 
 def last_ccd_temperature(request):
-    last_fits_image = FitsImage.objects.latest("ID")
-    ccd_temp = last_fits_image.CCD_TEMP
-    return render(request, "Observatory/home.html", {"CCD_temp": ccd_temp})
+    if FitsImage.objects.exists():
+        last_fits_image =  FitsImage.objects.latest("ID")
+        ccd_temp =  last_fits_image.CCD_TEMP
+        return ccd_temp
+    else:
+        return 0
