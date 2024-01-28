@@ -3,9 +3,21 @@ from .forms import ExportForm
 import django.db.utils
 from django.shortcuts import render
 from .scripts.parsing import Parsing
+from .scripts.generate_sky_map import generate_sky_map
 from django.db import connection
 from .models import FITS_Image
-from django.core.management import call_command
+from django.http import JsonResponse
+import tkinter as tk
+from tkinter import filedialog
+
+
+def open_file_explorer(request):
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)  # bring the window to the top
+    directory_path = filedialog.askdirectory()
+    root.destroy()
+    return JsonResponse({'directory_path': directory_path})
 
 
 def home(request):
@@ -21,6 +33,10 @@ def import_fits(request):
             directory_path = 'C:/Users/adamo/Downloads/' + directory_path[15:]
             p = Parsing(directory_path)
             result = execute_query(str(p))
+
+            if result:
+                generate_sky_map()
+                result += " Sky coverage map has been updated."
     else:
         form = DirectoryForm()
     return render(request, 'Observatory/import_fits.html', {'form': form, 'result': result})
@@ -34,7 +50,7 @@ def export_fits(request):
             pass
     else:
         form = ExportForm()
-    return render(request, 'Observatory/export_fits.html',  {'form': form})
+    return render(request, 'Observatory/export_fits.html', {'form': form})
 
 
 def execute_query(query):
