@@ -31,7 +31,7 @@ def import_fits(request):
         form = DirectoryForm(request.POST)
         if form.is_valid():
             directory_path = form.cleaned_data["directory_path"]
-            directory_path = "D:/TIS/20230503/" + directory_path[15:]  # change to your path to fits images instead of 'D:/'
+            directory_path = "C:/UNI/TIS/" + directory_path[15:]  # change to your path to fits images instead of 'D:/'
             parsing = Parsing(directory_path)
             result = execute_query(str(parsing))
     else:
@@ -43,12 +43,12 @@ def import_fits(request):
 def export_fits(request):  # TODO: REMOVE PRINTS
     if request.method == "POST":
         form = ExportForm(request.POST)
-        print(form.data)
+        # print(form.data)
 
         if form.is_valid():
-            fit = form.save(commit=False)
-            print(fit)
-            FitsImage.objects.filter()
+            fits_image = form.save(commit=False)
+            # print(fit)
+            print(len(FitsImage.objects.filter()))
 
             return redirect("export_fits")
 
@@ -74,12 +74,14 @@ def number_of_nights(request):
     else:
         return 0
 
+
 def number_of_frames(request):
     if FitsImage.objects.exists():
         frames = FitsImage.objects.latest("ID").ID
         return frames
     else:
         return 0
+
 
 def last_light_frames_night(request):
     if FitsImage.objects.filter(IMAGETYP="LIGHT").exists():
@@ -88,12 +90,14 @@ def last_light_frames_night(request):
     else:
         return 0
 
+
 def last_calib_frames_night(request):
     if FitsImage.objects.filter(IMAGETYP="CALIB").exists():
         calib_frames = FitsImage.objects.filter(IMAGETYP="CALIB").latest("ID").DATE_OBS
         return calib_frames
     else:
         return 0
+
 
 def last_ccd_temperature(request):
     if FitsImage.objects.exists():
