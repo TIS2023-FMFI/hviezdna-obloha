@@ -82,23 +82,23 @@ def number_of_frames(request):
         return 0
 
 def last_light_frames_night(request):
-    if FitsImage.objects.exists():
-        light_frames = FitsImage.objects.filter(IMAGETYP="light").latest("ID").DATE_OBS
+    if FitsImage.objects.filter(IMAGETYP="LIGHT").exists():
+        light_frames = FitsImage.objects.filter(IMAGETYP="LIGHT").latest("ID").DATE_OBS
         return light_frames
     else:
         return 0
 
 def last_calib_frames_night(request):
-    if FitsImage.objects.exists():
-        calib_frames = FitsImage.objects.filter(IMAGETYP="calib").latest("ID").DATE_OBS
+    if FitsImage.objects.filter(IMAGETYP="CALIB").exists():
+        calib_frames = FitsImage.objects.filter(IMAGETYP="CALIB").latest("ID").DATE_OBS
         return calib_frames
     else:
         return 0
 
 def last_ccd_temperature(request):
     if FitsImage.objects.exists():
-        last_fits_image =  FitsImage.objects.latest("ID")
-        ccd_temp =  last_fits_image.CCD_TEMP
+        last_fits_image = FitsImage.objects.latest("ID")
+        ccd_temp = last_fits_image.CCD_TEMP
         return ccd_temp
     else:
         return 0

@@ -26,7 +26,7 @@ class Parsing:
         self.query += ';'
 
     def start_query(self):
-        self.query = 'INSERT INTO \"Observatory_fits_image\" ('
+        self.query = 'INSERT INTO \"Observatory_fitsimage\" ('
         param_insert = self.PARAMETERS
 
         for param in param_insert:
