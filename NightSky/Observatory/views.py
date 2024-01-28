@@ -1,37 +1,15 @@
-import json
 from .forms import DirectoryForm
 from .forms import ExportForm
 import django.db.utils
-from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render
 from .scripts.parsing import Parsing
 from django.db import connection
 from .models import FITS_Image
+from django.core.management import call_command
 
 
 def home(request):
-    try:
-        fits_images = FITS_Image.objects.all().values(
-            'RA',
-            'DEC'
-        )
-
-        # process the query result to calculate FOV and prepare the data for the frontend
-        # sky_coverage_data contains the data needed for the frontend to plot the coverage map
-        sky_coverage_data = []
-        for image in fits_images:
-            sky_coverage_data.append({
-                'ra': image['RA'],
-                'dec': image['DEC']
-            })
-
-        # sky coverage data --> JSON
-        sky_coverage_json = json.dumps(sky_coverage_data, cls=DjangoJSONEncoder)
-
-        # pass the sky_coverage_json to the template
-        return render(request, 'Observatory/home.html', {'sky_coverage_json': sky_coverage_json})
-    except Exception:
-        return render(request, 'Observatory/home.html')
+    return render(request, 'Observatory/home.html')
 
 
 def import_fits(request):

@@ -52,27 +52,9 @@ a {
     color: aliceblue;
 }
 
-.svg-content-responsive {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
 #sky-map {
     width: 100%;
-    max-width: 100%;
-}
-
-.graticule {
-    stroke-width: 0.5px;
-    stroke-opacity: 0.5;
-    stroke-dasharray: 2,2; /* 2px dash 2px gap */
-}
-
-.graticule-outline {
-    stroke-width: 1px;
-    stroke-opacity: 1;
-    stroke-dasharray: none;
+    height: 100%;
 }
 
 
