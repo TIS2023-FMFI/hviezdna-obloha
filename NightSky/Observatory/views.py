@@ -30,7 +30,6 @@ def import_fits(request):
         form = DirectoryForm(request.POST)
         if form.is_valid():
             directory_path = form.cleaned_data['directory_path']
-            directory_path = 'C:/Users/adamo/Downloads/' + directory_path[15:]
             p = Parsing(directory_path)
             result = execute_query(str(p))
 
