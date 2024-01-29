@@ -1,4 +1,4 @@
-from ..models import FITS_Image
+from ..models import FitsImage
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 import matplotlib.pyplot as plt
@@ -6,14 +6,16 @@ import matplotlib.pyplot as plt
 
 def generate_sky_map():
     # Fetch data from the database
-    fits_images = FITS_Image.objects.all()
+    fits_images = FitsImage.objects.all()
 
-    sky_coverage_data = [{'ra': image.RA, 'dec': image.DEC} for image in fits_images]
+    sky_coverage_data = [
+        {"ra": image.RA, "dec": image.DEC} for image in fits_images if image.RA is not None and image.DEC is not None
+    ]
 
     # Convert RA and DEC to radians for Aitoff projection
-    ra = [data['ra'] - 180 for data in sky_coverage_data]
-    dec = [data['dec'] for data in sky_coverage_data]
-    c = SkyCoord(ra=ra * u.degree, dec=dec * u.degree, frame='icrs')
+    ra = [data["ra"] - 180 for data in sky_coverage_data]
+    dec = [data["dec"] for data in sky_coverage_data]
+    c = SkyCoord(ra=ra * u.degree, dec=dec * u.degree, frame="icrs")
     ra_rad = c.ra.wrap_at(180 * u.deg).radian
     dec_rad = c.dec.radian
 
@@ -29,5 +31,5 @@ def generate_sky_map():
     plt.ylabel("Declination", labelpad=20)
 
     # Save the plot as an image in the static folder
-    plt.savefig(r'static\sky_coverage_map.png', bbox_inches='tight')
+    plt.savefig(r"static\sky_coverage_map.png", bbox_inches="tight")
     plt.close()

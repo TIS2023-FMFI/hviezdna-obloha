@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "fb8fbc4e8d70550b5dd554158e0da5ede79074bbda66af408ae8537907bab8c7"
+            "sha256": "4e6d4b2195ddc3fec02df711be1b3d3163af43000ba07c2c55332bedf369c49c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -62,11 +62,11 @@
         },
         "astropy-iers-data": {
             "hashes": [
-                "sha256:112e7367d5ed23b41ce86d2d0688d5b7ccd2587547544855010b616f10489ada",
-                "sha256:9ffb20756667652503239cb2f7fd7a2871950991365d5e1e30f9643c1c151d10"
+                "sha256:a5b30cd160ca965ea4be7f21134dc1bf7ce596de9888a9afa0ccf06c885b91b1",
+                "sha256:ea065f2619173c2f8bbd1c457ef8324ae42de83c0fbe71790c1f2822f2612b23"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==0.2024.1.22.0.30.30"
+            "version": "==0.2024.1.29.0.30.37"
         },
         "django": {
             "hashes": [
@@ -76,6 +76,14 @@
             "index": "pypi",
             "markers": "python_version >= '3.10'",
             "version": "==5.0.1"
+        },
+        "et-xmlfile": {
+            "hashes": [
+                "sha256:8eb9e2bc2f8c97e37a2dc85a09ecdcdec9d8a396530a6d5a33b30b9a92da0c5c",
+                "sha256:a2ba85d1d6a74ef63837eed693bcb89c3f752169b0e3e7ae5b16ca5e1b3deada"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==1.1.0"
         },
         "numpy": {
             "hashes": [
@@ -118,6 +126,15 @@
             ],
             "markers": "python_version >= '3.12'",
             "version": "==1.26.3"
+        },
+        "openpyxl": {
+            "hashes": [
+                "sha256:a6f5977418eff3b2d5500d54d9db50c8277a368436f4e4f8ddb1be3422870184",
+                "sha256:f91456ead12ab3c6c2e9491cf33ba6d08357d802192379bb482f1033ade496f5"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.6'",
+            "version": "==3.1.2"
         },
         "packaging": {
             "hashes": [
@@ -210,10 +227,10 @@
         },
         "pytz": {
             "hashes": [
-                "sha256:7b4fddbeb94a1eba4b557da24f19fdf9db575192544270a9101d8509f9f43d7b",
-                "sha256:ce42d816b81b68506614c11e8937d3aa9e41007ceb50bfdcb0749b921bf646c7"
+                "sha256:31d4583c4ed539cd037956140d695e42c033a19e984bfce9964a3f7d59bc2b40",
+                "sha256:f90ef520d95e7c46951105338d918664ebfd6f1d995bd7d153127ce90efafa6a"
             ],
-            "version": "==2023.3.post1"
+            "version": "==2023.4"
         },
         "pyyaml": {
             "hashes": [
@@ -293,7 +310,7 @@
                 "sha256:aa3ace4329eeacda5b7beb7ea08ece826c28d761cda36e747cfbf97996d39bf3",
                 "sha256:dd54c94f294765522c77399649b4fefd95522479a664a0cec87f41bebc6148c9"
             ],
-            "markers": "python_version >= '2'",
+            "markers": "sys_platform == 'win32'",
             "version": "==2023.4"
         }
     },
