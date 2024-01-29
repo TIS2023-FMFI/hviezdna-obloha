@@ -2,8 +2,12 @@ from .forms import DirectoryForm
 from .forms import ExportForm
 import django.db.utils
 from django.shortcuts import render
-from .scripts.parsing import Parsing
+
+from .scripts.first_insert import process_folders_with_fits
+from .scripts.insert import Insert
+from .scripts.create_log import Log
 from .scripts.generate_sky_map import generate_sky_map
+
 from django.db import connection
 from .models import FITS_Image
 from django.http import JsonResponse
@@ -30,12 +34,21 @@ def import_fits(request):
         form = DirectoryForm(request.POST)
         if form.is_valid():
             directory_path = form.cleaned_data['directory_path']
-            p = Parsing(directory_path)
-            result = execute_query(str(p))
+            directory_path = 'D:/' + directory_path[15:] #change to your path to fits images instead of 'D:/'
 
-            if result:
-                generate_sky_map()
-                result += " Sky coverage map has been updated."
+            first_insert = False
+            if first_insert:
+                process_folders_with_fits(directory_path)
+            else:
+                # daily insert with generating log
+                insert = Insert(directory_path)
+                del insert
+                log = Log(directory_path)
+                log.generate_log()
+
+            generate_sky_map()
+            result += " Sky coverage map has been updated."
+
     else:
         form = DirectoryForm()
     return render(request, 'Observatory/import_fits.html', {'form': form, 'result': result})
@@ -50,15 +63,6 @@ def export_fits(request):
     else:
         form = ExportForm()
     return render(request, 'Observatory/export_fits.html', {'form': form})
-
-
-def execute_query(query):
-    with connection.cursor() as cursor:
-        try:
-            cursor.execute(query)
-            return 'DONE'
-        except django.db.utils.IntegrityError:
-            return 'Already in database'
 
 
 def number_of_nights(request):
