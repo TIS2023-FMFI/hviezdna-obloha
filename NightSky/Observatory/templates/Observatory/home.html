@@ -8,6 +8,14 @@
     <title>Charon's Little Helper</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
 
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+
+    <!-- deck.gl -->
+    <script src="https://unpkg.com/deck.gl@8.5.0/dist.min.js"></script>
+
+
     <style>
         #statistics {
             margin-top: 20px;
@@ -43,7 +51,11 @@
             <a href="{% url 'export_fits' %}">Export Images</a>
         </nav>
     </div>
-    <div id="map">
+    <div class="contents">
+        <article class="content_part">
+            <img id="sky-map" src="{% static 'sky_coverage_map.png' %}" alt="Sky Coverage Map">
+        </article>
+    </div>
     </div>
     <div id="statistics">
         <h2>Statistics</h2>

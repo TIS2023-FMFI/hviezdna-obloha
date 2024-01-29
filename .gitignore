@@ -5,3 +5,4 @@ db.*
 /uploads/
 NightSky/.idea/
 .idea/
+Observatory/migrations/

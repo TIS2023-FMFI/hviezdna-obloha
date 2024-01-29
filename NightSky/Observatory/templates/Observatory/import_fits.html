@@ -31,22 +31,20 @@
                 <h3>{{ form.directory_path.label_tag }}</h3><br>
                 {{ form.directory_path }}
 
-                <input type="file" id="file-browse" webkitdirectory style="display: none;" onchange="updateInputWithPath(this)">
-                <button type="button" onclick="document.getElementById('file-browse').click()">Browse</button>
+                <button type="button" onclick="triggerFileExplorer()">Browse</button>
                 <input type="submit" value="Import">
             </form>
 
             <script>
-            function updateInputWithPath(input) {
-                const files = input.files;
-                if (files.length) {
-                    const directoryName = files[0].webkitRelativePath.split('/')[0];
-                    // updates the input field with the hardcoded path and the selected directory name
-                    document.getElementById('directory_path').value = 'Hardcoded_path\\' + directoryName;
-                }
+            function triggerFileExplorer() {
+                fetch('{% url "open_file_explorer" %}')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('directory_path').value = data.directory_path;
+                })
+                .catch(error => console.error('Error:', error));
             }
             </script>
-
         </article>
     </div>
 </body>

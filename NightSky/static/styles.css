@@ -30,7 +30,7 @@ h1 {
     justify-content: center;
 }
 
-h2 , h3{
+h2, h3 {
     margin: 0;
 }
 
@@ -79,4 +79,9 @@ a {
 
 .field-input {
     margin: 10px;
+}
+
+#sky-map {
+    width: 100%;
+    height: 100%;
 }
