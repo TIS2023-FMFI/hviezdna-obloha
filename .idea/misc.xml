@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Black">
-    <option name="sdkName" value="C:\Users\adamo\AppData\Local\Programs\Python\Python312\python.exe" />
+    <option name="enabledOnReformat" value="true" />
+    <option name="enabledOnSave" value="true" />
+    <option name="sdkName" value="Pipenv (hviezdna-obloha)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Pipenv (hviezdna-obloha) (2)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Pipenv (hviezdna-obloha)" project-jdk-type="Python SDK" />
 </project>

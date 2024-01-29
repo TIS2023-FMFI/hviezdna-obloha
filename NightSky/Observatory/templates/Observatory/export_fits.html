@@ -1,94 +1,95 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Charon's Little Helper - Import Fits</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
-
-    <style>
-
-        #export {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        #ExportForm {
-            padding: 20px;
-            border-radius: 20px;
-        }
-        .checkbox-container {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 15px;
-            margin: 10px auto;
-            border-radius: 10px;
-        }
-
-        .checkbox-container label {
-            display: block;
-            margin-bottom: 5px;
-        }
-    </style>
-
 </head>
+
 <body>
-    <div class="title_a_navbar">
-        <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
-        <nav>
-            <a href="{% url 'import_fits' %}">Import Images</a>
-            <a href="{% url 'export_fits' %}">Export Images</a>
-        </nav>
-    </div>
-    <div id="export">
+
+<script>
+    function toggleVisibility(id) {
+        const checkbox = document.getElementById("checkbox-" + id);
+        const fieldDiv = document.getElementById("div-" + id);
+
+        if (checkbox.checked) {
+            fieldDiv.removeAttribute("hidden");
+        } else {
+            fieldDiv.setAttribute("hidden", "hidden");
+        }
+    }
+</script>
+
+<div class="title_a_navbar">
+    <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
+    <nav>
+        <a href="{% url 'import_fits' %}">Import Images</a>
+        <a href="{% url 'export_fits' %}">Export Images</a>
+    </nav>
+</div>
+
+<div id="export">
     <h2>
         Export FITS Images
     </h2>
-    </div>
+</div>
 
-    <form method="post" id="ExportForm">
-        {% csrf_token %}
-        <div class="checkbox-container">
-            {% for field in form %}
-                <label><input type="checkbox" name="{{ field.name }}" onclick="updateCheckedNames(this)"> {{ field.label }}</label>
-            {% endfor %}
-        </div>
+<form method="post" id="ExportForm" action="{% url 'export_fits' %}">
+    {% csrf_token %}
+    {{ form.errors }}
 
-    </form>
-
-    <div id="checked-names"></div>
-
-     <script>
-        function updateCheckedNames(checkbox) {
-            var checkedNamesDiv = document.getElementById('checked-names');
-            var label = checkbox.parentNode.textContent.trim(); // Get the label text
-
-            if (checkbox.checked) {
-                // Append the checked checkbox
-                checkedNamesDiv.innerHTML += '<p>' + label + '</p>';
-            } else {
-                // Remove the unchecked checkbox
-                var regex = new RegExp('<p>' + label + '<\/p>', 'g');
-                checkedNamesDiv.innerHTML = checkedNamesDiv.innerHTML.replace(regex, '');
-            }
-        }
+    <script>
+        document.write(
+            "<div class=\"checkbox-container\">" +
+        "{% for field in form %}" +
+            "<label>" +
+            "<input type=\"checkbox\" id=\"checkbox-{{ field.auto_id }}\" name=\"{{ field.name }}\"" +
+            "value=\"{{ field.value }}\" onchange=\"toggleVisibility('{{ field.auto_id }}')\">" +
+            "{{ field.label }}" +
+            "</label>" +
+        "{% endfor %}" +
+        "</div>"
+        )
     </script>
 
+{#    <div class="checkbox-container">#}
+{#        {% for field in form %}#}
+{#            <label>#}
+{#                <input type="checkbox" id="checkbox-{{ field.auto_id }}" name="{{ field.name }}"#}
+{#                       value="{{ field.value }}" onchange="toggleVisibility('{{ field.auto_id }}')">#}
+{#                {{ field.label }}#}
+{#            </label>#}
+{#        {% endfor %}#}
+{#    </div>#}
 
-    <div>
-        File Path
-    </div>
-    <div>
-        SQL Query
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="" name="">
-            <button type="submit">Apply filter</button>
-        </form>
-    </div>
+    {% for field in form %}
+        <div hidden="hidden" id="div-{{ field.auto_id }}" class="field-input">
+            <label>
+                {{ field.label }}
+            </label>
+            {{ field }}
+        </div>
+    {% endfor %}
+
+    <button type="submit" style="margin: 10px">Submit</button>
+</form>
+
+<div>
+    File Path
+</div>
+
+<div>
+    SQL Query
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button type="submit">Apply filter</button>
+    </form>
+</div>
 </body>
+
 </html>
