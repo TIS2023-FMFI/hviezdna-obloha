@@ -13,7 +13,7 @@ def generate_sky_map():
     ]
 
     # Convert RA and DEC to radians for Aitoff projection
-    ra = [data["ra"] - 180 for data in sky_coverage_data]
+    ra = [data["ra"] for data in sky_coverage_data]
     dec = [data["dec"] for data in sky_coverage_data]
     c = SkyCoord(ra=ra * u.degree, dec=dec * u.degree, frame="icrs")
     ra_rad = c.ra.wrap_at(180 * u.deg).radian
