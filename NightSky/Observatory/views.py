@@ -1,6 +1,4 @@
-import django.db.utils
 from django.shortcuts import render, redirect
-from django.db import connection
 from django.http import JsonResponse
 
 from .forms import DirectoryForm, ExportForm
@@ -114,28 +112,28 @@ def number_of_nights(request):
 
 def number_of_frames(request):
     if FitsImage.objects.exists():
-        frames = FitsImage.objects.latest("ID").ID
+        frames = FitsImage.objects.count()
         return frames
     return 0
 
 
 def last_light_frames_night(request):
     if FitsImage.objects.filter(IMAGETYP="LIGHT").exists():
-        light_frames = FitsImage.objects.filter(IMAGETYP="LIGHT").latest("ID").DATE_OBS
+        light_frames = FitsImage.objects.filter(IMAGETYP="LIGHT").latest("DATE_OBS").DATE_OBS
         return light_frames
     return 0
 
 
 def last_calib_frames_night(request):
     if FitsImage.objects.filter(IMAGETYP="CALIB").exists():
-        calib_frames = FitsImage.objects.filter(IMAGETYP="CALIB").latest("ID").DATE_OBS
+        calib_frames = FitsImage.objects.filter(IMAGETYP="CALIB").latest("DATE_OBS").DATE_OBS
         return calib_frames
     return 0
 
 
 def last_ccd_temperature(request):
     if FitsImage.objects.exists():
-        last_fits_image = FitsImage.objects.latest("ID")
+        last_fits_image = FitsImage.objects.latest("DATE_OBS")
         ccd_temp = last_fits_image.CCD_TEMP
         return ccd_temp
     return 0
