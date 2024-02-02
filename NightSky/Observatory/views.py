@@ -27,7 +27,6 @@ def open_file_explorer(request):
 
 
 def home(request):
-    generate_sky_map()
     nights = number_of_nights(request)
     frames = number_of_frames(request)
     last_light_frame = last_light_frames_night(request)
