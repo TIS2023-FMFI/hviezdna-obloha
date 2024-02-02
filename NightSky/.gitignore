@@ -1,7 +1,0 @@
-**/__pycache__/
-node_modules/
-.idea/
-.env
-db.*
-/uploads/
-Observatory/migrations/
