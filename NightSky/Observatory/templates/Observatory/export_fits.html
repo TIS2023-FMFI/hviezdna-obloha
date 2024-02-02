@@ -34,12 +34,7 @@
 
     <div class="contents">
         <div class="content_part">
-            <div id="export">
-                <h2>
-                    Export FITS Images
-                </h2>
-            </div>
-
+            <h2>Export FITS Images</h2>
             <form method="post" id="ExportForm" action="{% url 'export_fits' %}">
                 {% csrf_token %}
                 {{ form.errors }}
