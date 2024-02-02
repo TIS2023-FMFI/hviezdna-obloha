@@ -12,6 +12,9 @@ from .scripts.generate_sky_map import generate_sky_map
 
 import tkinter as tk
 from tkinter import filedialog
+import os
+
+from datetime import datetime
 
 
 def open_file_explorer(request):
@@ -41,31 +44,38 @@ def home(request):
 
 
 def import_fits(request):
-    result = ""
+    form = DirectoryForm(request.POST or None)
+    path = r'C:\Users\adamo\Downloads'
+
+    # Get the last added directory path in the archive
+    directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+    directories.sort(key=lambda x: os.path.getctime(os.path.join(path, x)), reverse=True)
+    last_added_directory_path = os.path.join(path, directories[0]) if directories else None
 
     if request.method == "POST":
-        form = DirectoryForm(request.POST)
-
-        if form.is_valid():
+        if 'import_last_night' in request.POST and last_added_directory_path:
+            directory_path = last_added_directory_path
+            process_and_log_directory(directory_path, request)
+        elif form.is_valid():
             directory_path = form.cleaned_data["directory_path"]
+            process_and_log_directory(directory_path, request)
 
-            first_insert = False
-            if first_insert:
-                process_folders_with_fits(directory_path)
-            else:
-                # daily insert with generating log
-                insert = Insert(directory_path)
-                del insert
-                log = Log(directory_path)
-                log.generate_log()
+    return render(request, "Observatory/import_fits.html", {
+        "form": form,
+        "last_added_directory_path": last_added_directory_path
+    })
 
-            generate_sky_map()
-            result += " Sky coverage map has been updated."
 
+def process_and_log_directory(directory_path, request):
+    first_insert = False
+    if first_insert:
+        process_folders_with_fits(directory_path)
     else:
-        form = DirectoryForm()
-
-    return render(request, "Observatory/import_fits.html", {"form": form, "result": result})
+        insert = Insert(directory_path)
+        del insert
+        log = Log(directory_path)
+        log.generate_log()
+    generate_sky_map()
 
 
 def export_fits(request):  # TODO: REMOVE PRINTS
@@ -88,14 +98,15 @@ def export_fits(request):  # TODO: REMOVE PRINTS
 
 def number_of_nights(request):
     if FitsImage.objects.exists():
-        nights = FitsImage.objects.values("DATE_OBS").distinct().count()
-        return nights
+        date_obs_values = FitsImage.objects.values_list('DATE_OBS', flat=True)
+        dates = set(datetime.strptime(date_obs.split('T')[0], '%Y-%m-%d').date() for date_obs in date_obs_values)
+        return len(dates)
     return 0
 
 
 def number_of_frames(request):
     if FitsImage.objects.exists():
-        frames = FitsImage.objects.count()
+        frames = FitsImage.objects.latest("ID").ID
         return frames
     return 0
 
