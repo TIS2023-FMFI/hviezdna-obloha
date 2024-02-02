@@ -24,16 +24,27 @@
         </article>
         <article class="content_part">
             <form method="post" action="{% url 'import_fits' %}">
+
                 <h3>Last Night File Path:</h3>
                 <div class="form-container">
                     {% csrf_token %}
                     (path: "{{ last_added_directory_path }}")
                     <input type="submit" name="import_last_night" value="Import">
                 </div>
+
+                {% if request.session.form_submitted == 'import_last_night' %}
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
             </form>
         </article>
         <article class="content_part" style="margin: 0">
             <form method="post" action="{% url 'import_fits' %}">
+
                 {% csrf_token %}
                 <h3>{{ form.directory_path.label_tag }}</h3>
                 <div class="form-container">
@@ -41,8 +52,16 @@
                     <button type="button" onclick="triggerFileExplorer()">Browse</button>
                     <input type="submit" name="import_directory" value="Import">
                 </div>
-            </form>
 
+                {% if request.session.form_submitted == 'import_directory' %}
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+            </form>
             <script>
             function triggerFileExplorer() {
                 fetch('{% url "open_file_explorer" %}')
