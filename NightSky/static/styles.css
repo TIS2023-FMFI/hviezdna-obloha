@@ -98,9 +98,24 @@ input[type="submit" i], button {
     font-size: 18px;
 }
 
+#directory_path {
+    flex-grow: 1;
+    border: none;
+    border-radius: 5px;
+    height: 42px;
+    padding: 0 10px;
+    font-size: 18px;
+}
+
 #ExportForm {
     padding: 20px;
     border-radius: 20px;
+}
+
+#sql_input {
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
 }
 
 .checkbox-container {

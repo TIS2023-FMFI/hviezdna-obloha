@@ -45,7 +45,7 @@ def home(request):
 
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r'C:\Users\adamo\Downloads'
+    path = r'D:\TIS\20230503'
 
     # Get the last added directory path in the archive
     directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
@@ -81,11 +81,11 @@ def process_and_log_directory(directory_path, request):
 def export_fits(request):  # TODO: REMOVE PRINTS
     if request.method == "POST":
         form = ExportForm(request.POST)
-        # print(form.data)
-
-        if form.is_valid():
+        if 'sql_query_export' in request.POST:
+            sql_input = request.POST.get('sql_input', None)
+            print(f" Input: {sql_input}")
+        elif form.is_valid():
             fits_image = form.save(commit=False)
-            # print(fit)
             print(len(FitsImage.objects.filter()))
 
             return redirect("export_fits")

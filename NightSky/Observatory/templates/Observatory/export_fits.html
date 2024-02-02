@@ -9,7 +9,13 @@
     <title>Charon's Little Helper - Import Fits</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
 </head>
-
+<style>
+    #sql_input{
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+}
+</style>
 <body>
 
 <script>
@@ -79,11 +85,17 @@
             </div>
 
             <div>
+                <article class="content_part" style="margin: 0">
                 SQL Query
-                <form method="post" enctype="multipart/form-data">
+                <form method="post" enctype="multipart/form-data" action="{% url 'export_fits' %}">
                     {% csrf_token %}
-                    <button type="submit">Apply filter</button>
+                    <div class="form-container">
+                    <label for="sql_input">SQL Query:</label>
+                    <textarea id="sql_input" name="sql_input" rows="2" cols="150" placeholder="SELECT * FROM Observatory_fitsimage WHERE NAXIS = 2;"></textarea>
+                    <input type="submit" name="sql_query_export" value="Export">
+                </div>
                 </form>
+                </article>
             </div>
         </div>
     </div>
