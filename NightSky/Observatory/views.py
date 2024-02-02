@@ -48,7 +48,6 @@ def import_fits(request):
 
         if form.is_valid():
             directory_path = form.cleaned_data["directory_path"]
-            # directory_path = 'D:/' + directory_path[15:] #change to your path to fits images instead of 'D:/'
 
             first_insert = False
             if first_insert:
@@ -96,7 +95,7 @@ def number_of_nights(request):
 
 def number_of_frames(request):
     if FitsImage.objects.exists():
-        frames = FitsImage.objects.latest("ID").ID
+        frames = FitsImage.objects.count()
         return frames
     return 0
 
