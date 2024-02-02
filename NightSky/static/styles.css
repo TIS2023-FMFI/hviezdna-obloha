@@ -1,29 +1,33 @@
 body {
-    background: url("heic2002a.jpg") no-repeat fixed center;
+    background: url("heic1307a.jpg") no-repeat fixed center;
     background-size: cover;
     color: #E6E6E6;
-    margin: 0;
+    padding: 20px 40px;
+    font-size: 1.2em;
 }
 
 .title_a_navbar {
-    background: rgba(21, 22, 27, 0.85);
+    background: rgba(9, 14, 25, 0.92);
     padding: 30px;
     backdrop-filter: blur(10px);
-    border-radius: 0 0 10px 10px;
-    box-shadow: inset 0 -5px 5px -4px #9ab9dd;
+    border-radius: 10px;
+    box-shadow: inset 0 -1px 2px 1px #637b8d;
+    margin-bottom: 20px;
 }
 
 .contents {
-    margin: 3em 5em;
+    background: rgba(9, 14, 25, 0.92);
+    box-shadow: inset 0 1px 2px 1px #637b8d;
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 25px 35px;
 }
 
 .content_part {
-    background: rgba(21, 22, 27, 0.85);
-    backdrop-filter: blur(10px);
+    background: rgba(31, 48, 63, 0.82);
     border-radius: 10px;
-    margin-bottom: 20px;
-    padding: 20px;
-    box-shadow: inset 0 1px 2px 0 #9ab9dd;
+    padding: 15px 25px;
+    margin-bottom: 15px;
 }
 
 h1 {
@@ -58,7 +62,36 @@ a {
 }
 
 a:hover {
-    box-shadow: inset 0 -5px 4px -4px #9ab9dd;
+    box-shadow: inset 0 -5px 4px -4px #637b8d;
+}
+
+.form-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+input[type="submit" i], button {
+    background: rgba(9, 14, 25, 0.92);
+    border-radius: 5px;
+    color: #E6E6E6;
+    border: none;
+    font-size: 1em;
+    padding: 10px 15px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+input[type="text" i] {
+    flex-grow: 1;
+    border: none;
+    border-radius: 5px;
+    height: 42px;
+    padding: 0 10px;
+    font-size: 18px;
 }
 
 #export {
