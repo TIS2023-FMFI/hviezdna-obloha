@@ -2,6 +2,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 from datetime import datetime
+from configparser import ConfigParser
 
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
@@ -46,7 +47,11 @@ def read_config_file():
 
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r"C:\Users\adamo\Downloads"
+
+    # TODO: encapsulate config parser
+    config = ConfigParser()
+    config.read('static/config.ini')
+    path = config['Paths']['fits_archive']
 
     # Get the last added directory path in the archive
     directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
@@ -57,6 +62,7 @@ def import_fits(request):
         if "import_last_night" in request.POST and last_added_directory_path:
             directory_path = last_added_directory_path
             process_and_log_directory(directory_path, request)
+
         elif form.is_valid():
             directory_path = form.cleaned_data["directory_path"]
             process_and_log_directory(directory_path, request)
