@@ -14,7 +14,7 @@ import tkinter as tk
 from tkinter import filedialog
 import os
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def open_file_explorer(request):
@@ -27,6 +27,7 @@ def open_file_explorer(request):
 
 
 def home(request):
+    generate_sky_map()
     nights = number_of_nights(request)
     frames = number_of_frames(request)
     last_light_frame = last_light_frames_night(request)
@@ -99,8 +100,16 @@ def export_fits(request):  # TODO: REMOVE PRINTS
 def number_of_nights(request):
     if FitsImage.objects.exists():
         date_obs_values = FitsImage.objects.values_list('DATE_OBS', flat=True)
-        dates = set(datetime.strptime(date_obs.split('T')[0], '%Y-%m-%d').date() for date_obs in date_obs_values)
-        return len(dates)
+
+        adjusted_dates = set()
+        for date_obs in date_obs_values:
+            date_time = datetime.strptime(date_obs, '%Y-%m-%dT%H:%M:%S.%f')
+
+            if date_time.time() < datetime.strptime('12:00:00', '%H:%M:%S').time():
+                date_time -= timedelta(days=1)
+            adjusted_dates.add(date_time.date())
+
+        return len(adjusted_dates)
     return 0
 
 
