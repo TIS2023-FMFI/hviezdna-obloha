@@ -85,7 +85,7 @@ input[type="submit" i], button {
     flex-shrink: 0;
 }
 
-input[type="text" i] {
+#directory_path {
     flex-grow: 1;
     border: none;
     border-radius: 5px;
