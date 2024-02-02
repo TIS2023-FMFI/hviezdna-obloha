@@ -1,6 +1,9 @@
-import django.db.utils
+import os
+import tkinter as tk
+from tkinter import filedialog
+from datetime import datetime
+
 from django.shortcuts import render, redirect
-from django.db import connection
 from django.http import JsonResponse
 
 from .forms import DirectoryForm, ExportForm
@@ -9,12 +12,6 @@ from .scripts.first_insert import process_folders_with_fits
 from .scripts.insert import Insert
 from .scripts.create_log import Log
 from .scripts.generate_sky_map import generate_sky_map
-
-import tkinter as tk
-from tkinter import filedialog
-import os
-
-from datetime import datetime
 
 
 def open_file_explorer(request):
@@ -41,6 +38,10 @@ def home(request):
         "ccd_temp": ccd_temp,
     }
     return render(request, "Observatory/home.html", context)
+
+
+def read_config_file():
+    ...
 
 
 def import_fits(request):
