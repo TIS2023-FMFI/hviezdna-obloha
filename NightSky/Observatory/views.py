@@ -1,6 +1,9 @@
-import django.db.utils
+import os
+import tkinter as tk
+from tkinter import filedialog
+from datetime import datetime
+
 from django.shortcuts import render, redirect
-from django.db import connection
 from django.http import JsonResponse
 
 from .forms import DirectoryForm, ExportForm
@@ -9,12 +12,6 @@ from .scripts.first_insert import process_folders_with_fits
 from .scripts.insert import Insert
 from .scripts.create_log import Log
 from .scripts.generate_sky_map import generate_sky_map
-
-import tkinter as tk
-from tkinter import filedialog
-import os
-
-from datetime import datetime
 
 
 def open_file_explorer(request):
@@ -45,7 +42,7 @@ def home(request):
 
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r'C:\Users\adamo\Downloads'
+    path = r"C:\Users\adamo\Downloads"
 
     # Get the last added directory path in the archive
     directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
@@ -53,17 +50,17 @@ def import_fits(request):
     last_added_directory_path = os.path.join(path, directories[0]) if directories else None
 
     if request.method == "POST":
-        if 'import_last_night' in request.POST and last_added_directory_path:
+        if "import_last_night" in request.POST and last_added_directory_path:
             directory_path = last_added_directory_path
             process_and_log_directory(directory_path, request)
+
         elif form.is_valid():
             directory_path = form.cleaned_data["directory_path"]
             process_and_log_directory(directory_path, request)
 
-    return render(request, "Observatory/import_fits.html", {
-        "form": form,
-        "last_added_directory_path": last_added_directory_path
-    })
+    return render(
+        request, "Observatory/import_fits.html", {"form": form, "last_added_directory_path": last_added_directory_path}
+    )
 
 
 def process_and_log_directory(directory_path, request):
@@ -98,8 +95,8 @@ def export_fits(request):  # TODO: REMOVE PRINTS
 
 def number_of_nights(request):
     if FitsImage.objects.exists():
-        date_obs_values = FitsImage.objects.values_list('DATE_OBS', flat=True)
-        dates = set(datetime.strptime(date_obs.split('T')[0], '%Y-%m-%d').date() for date_obs in date_obs_values)
+        date_obs_values = FitsImage.objects.values_list("DATE_OBS", flat=True)
+        dates = set(datetime.strptime(date_obs.split("T")[0], "%Y-%m-%d").date() for date_obs in date_obs_values)
         return len(dates)
     return 0
 
