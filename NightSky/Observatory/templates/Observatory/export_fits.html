@@ -6,15 +6,84 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charon's Little Helper - Import Fits</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+    <title>Charon's Little Helper - Import Fits</title>
 </head>
+
 <style>
-    #sql_input{
-    border: none;
-    border-radius: 5px;
-    font-size: 18px;
-}
+    #sql_input {
+        border: none;
+        border-radius: 5px;
+        font-size: 18px;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-content {
+        background-color: rgb(0, 0, 0);
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        text-align: center;
+        border-radius: 10px;
+    }
+
+    .close {
+        color: #888;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    #resultsLengthText {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .modalButtons {
+        margin: 0 10px;
+        padding: 10px 20px;
+        font-size: 18px;
+        cursor: pointer;
+        background-color: white;
+        color: black;
+        border: 1px solid #888;
+        border-radius: 5px;
+    }
+
+    .modalButtons:hover,
+    .modalButtons:focus {
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+        background-color: darkred;
+        border: 1px solid #888;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px;
+    }
 </style>
 <body>
 
@@ -30,75 +99,109 @@
         }
     }
 </script>
-    <div class="title_a_navbar">
-        <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
-        <nav>
-            <a href="{% url 'import_fits' %}">Import Images</a>
-            <a href="{% url 'export_fits' %}">Export Images</a>
-        </nav>
-    </div>
+<div class="title_a_navbar">
+    <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
+    <nav>
+        <a href="{% url 'import_fits' %}">Import Images</a>
+        <a href="{% url 'export_fits' %}">Export Images</a>
+    </nav>
+</div>
 
-    <div class="contents">
-        <div class="content_part">
-            <h2>Export FITS Images</h2>
-            <form method="post" id="ExportForm" action="{% url 'export_fits' %}">
-                {% csrf_token %}
-                {{ form.errors }}
+<div class="contents">
+    <div class="content_part">
+        <h2>Export FITS Images</h2>
+        <form method="post" id="ExportForm" action="{% url 'export_fits' %}">
+            {% csrf_token %}
+            {{ form.errors }}
 
-                <script>
-                    document.write(
-                        "<div class=\"checkbox-container\">" +
+            <script>
+                document.write(
+                    "<div class=\"checkbox-container\">" +
                     "{% for field in form %}" +
                         "<label>" +
                         "<input type=\"checkbox\" id=\"checkbox-{{ field.auto_id }}\" name=\"{{ field.name }}\"" +
                         "value=\"{{ field.value }}\" onchange=\"toggleVisibility('{{ field.auto_id }}')\">" +
                         "{{ field.label }}" +
                         "</label>" +
-                    "{% endfor %}" +
+                        "{% endfor %}" +
                     "</div>"
-                    )
-                </script>
+                )
+            </script>
 
-            {#    <div class="checkbox-container">#}
-            {#        {% for field in form %}#}
-            {#            <label>#}
-            {#                <input type="checkbox" id="checkbox-{{ field.auto_id }}" name="{{ field.name }}"#}
-            {#                       value="{{ field.value }}" onchange="toggleVisibility('{{ field.auto_id }}')">#}
-            {#                {{ field.label }}#}
-            {#            </label>#}
-            {#        {% endfor %}#}
-            {#    </div>#}
+            {% for field in form %}
+                <div hidden="hidden" id="div-{{ field.auto_id }}" class="field-input">
+                    <label>
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <button type="submit" style="margin: 10px">Submit</button>
+        </form>
 
-                {% for field in form %}
-                    <div hidden="hidden" id="div-{{ field.auto_id }}" class="field-input">
-                        <label>
-                            {{ field.label }}
-                        </label>
-                        {{ field }}
-                    </div>
-                {% endfor %}
-                <button type="submit" style="margin: 10px">Submit</button>
-            </form>
-
-            <div>
-                File Path
-            </div>
-
-            <div>
-                <article class="content_part" style="margin: 0">
-                SQL Query
+        <div>
+            File Path
+        </div>
+        <div>
+            <article class="content_part" style="margin: 0">
+                <h2>SQL query</h2>
                 <form method="post" enctype="multipart/form-data" action="{% url 'export_fits' %}">
                     {% csrf_token %}
                     <div class="form-container">
-                    <label for="sql_input">SQL Query:</label>
-                    <textarea id="sql_input" name="sql_input" rows="2" cols="150" placeholder="SELECT * FROM Observatory_fitsimage WHERE NAXIS = 2;"></textarea>
-                    <input type="submit" name="sql_query_export" value="Export">
-                </div>
+                        {# }<label for="sql_input">SQL query:</label>#}
+                        <textarea id="sql_input" name="sql_input" rows="2" cols="150"
+                                  title='Enter your SQL query here. For example:&#10; SELECT "PATH" FROM "Observatory_fitsimage" WHERE "NAXIS" = 2'
+                        >SELECT "PATH" FROM "Observatory_fitsimage" </textarea>
+                        <input type="submit" name="sql_query_export" value="Export">
+                    </div>
                 </form>
-                </article>
-            </div>
+
+            </article>
         </div>
     </div>
+</div>
+
+<!-- Export Pop-up window -->
+<div id="ExportModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('ExportModal')">&times;</span>
+        <p id="resultsLengthText"></p>
+        <div class="button-container">
+            <button class="modalButtons" onclick="closeModal('ExportModal')">CANCEL</button>
+            <button class="modalButtons" onclick="closeModal('ExportModal')">EXPORT</button>
+        </div>
+    </div>
+</div>
+
+<!-- Wrong SQL query Pop-up window -->
+<div id="SQLqueryModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('SQLqueryModal')">&times;</span>
+        <p id="ErrorMessage"></p>
+    </div>
+</div>
+
+<script>
+    <!-- script to pop-up windows -->
+
+    {% if errorMessage is not None %}
+        document.getElementById('ErrorMessage').innerText = 'Error: {{ errorMessage }}';
+        document.getElementById('SQLqueryModal').style.display = 'block';
+    {% endif %}
+
+    {% if results_length is not None %}
+        document.getElementById('resultsLengthText').innerText = 'Number of frames to export: {{ results_length }}';
+        document.getElementById('ExportModal').style.display = 'block';
+    {% endif %}
+
+
+    function closeModal(modalId) {
+        var modal = document.getElementById(modalId);
+        modal.style.display = 'none';
+    }
+
+</script>
+
 </body>
 
 </html>

@@ -12,9 +12,13 @@ from .scripts.generate_sky_map import generate_sky_map
 
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import messagebox
 import os
 
 from datetime import datetime
+import re
+
+
 
 
 def open_file_explorer(request):
@@ -79,21 +83,34 @@ def process_and_log_directory(directory_path, request):
 
 
 def export_fits(request):  # TODO: REMOVE PRINTS
+    results_length = None
     if request.method == "POST":
         form = ExportForm(request.POST)
         if 'sql_query_export' in request.POST:
-            sql_input = request.POST.get('sql_input', None)
-            print(f" Input: {sql_input}")
+            sql_input = add_quotes(request.POST.get('sql_input', None))
+            try:
+                if is_valid_sql_query(sql_input):
+                    with connection.cursor() as cursor:
+                        cursor.execute(sql_input)
+                        results = cursor.fetchall()
+                        results_length = len(results)
+                        print(f"Results:{len(results)} {results}, ")
+                else:
+                    return render(request, "Observatory/export_fits.html", {"form": form, "errorMessage": "Wrong SQL query"})
+            except Exception as e:
+                print(f"Error executing the SQL query: {e}")
+                return render(request, "Observatory/export_fits.html", {"form": form, "errorMessage": "Wrong SQL query"})
+
         elif form.is_valid():
             fits_image = form.save(commit=False)
-            print(len(FitsImage.objects.filter()))
-
-            return redirect("export_fits")
+            #print(len(FitsImage.objects.filter()))
+            return JsonResponse({'results_length': results_length})
+            #return redirect("export_fits")
 
     else:
         form = ExportForm()
 
-    return render(request, "Observatory/export_fits.html", {"form": form})
+    return render(request, "Observatory/export_fits.html", {"form": form, "results_length": results_length})
 
 
 def number_of_nights(request):
@@ -131,3 +148,38 @@ def last_ccd_temperature(request):
         ccd_temp = last_fits_image.CCD_TEMP
         return ccd_temp
     return 0
+
+
+def is_valid_sql_query(query):
+    query = query.strip()
+
+    if re.search(r'\b(DELETE|DROP|TRUNCATE)\b', query):
+        return False
+
+    if 'SELECT "PATH" FROM "Observatory_fitsimage"' in query:
+        return True
+
+    return False
+
+def add_quotes(query):
+    columns = [
+        'ID', 'NAXIS', 'NAXIS1', 'NAXIS2', 'IMAGETYP', 'FILTER', 'OBJECT_NAME',
+        'SERIES', 'NOTES', 'DATE_OBS', 'MJD_OBS', 'EXPTIME', 'CCD_TEMP',
+        'XBINNING', 'YBINNING', 'XORGSUBF', 'YORGSUBF', 'MODE', 'GAIN',
+        'RD_NOISE', 'OBSERVER', 'RA', 'DEC', 'RA_PNT', 'DEC_PNT', 'AZIMUTH',
+        'ELEVATIO', 'AIRMASS', 'RATRACK', 'DECTRACK', 'PHASE', 'RANGE',
+        'PATH'
+    ]
+    query_words = query.split()
+    print(query_words)
+
+    for i in range(len(query_words)):
+        word = query_words[i].upper()
+        if word in columns:
+            query_words[i] = (f'"{word.upper()}"')
+    updated_query = ' '.join(query_words)
+
+    # Add quotes to table name if not already present
+    updated_query = re.sub(r'FROM (\w+)', r'FROM "\1"', updated_query, flags=re.IGNORECASE)
+
+    return updated_query
