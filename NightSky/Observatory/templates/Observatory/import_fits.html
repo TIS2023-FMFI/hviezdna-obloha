@@ -23,16 +23,24 @@
             <h2>Import Fits Images</h2>
         </article>
         <article class="content_part">
-            <h3>Last Night File Path</h3>
+            <form method="post" action="{% url 'import_fits' %}">
+                <h3>Last Night File Path:</h3>
+                <div class="form-container">
+                    {% csrf_token %}
+                    (path: "{{ last_added_directory_path }}")
+                    <input type="submit" name="import_last_night" value="Import">
+                </div>
+            </form>
         </article>
-        <article class="content_part">
+        <article class="content_part" style="margin: 0">
             <form method="post" action="{% url 'import_fits' %}">
                 {% csrf_token %}
-                <h3>{{ form.directory_path.label_tag }}</h3><br>
-                {{ form.directory_path }}
-
-                <button type="button" onclick="triggerFileExplorer()">Browse</button>
-                <input type="submit" value="Import">
+                <h3>{{ form.directory_path.label_tag }}</h3>
+                <div class="form-container">
+                    {{ form.directory_path }}
+                    <button type="button" onclick="triggerFileExplorer()">Browse</button>
+                    <input type="submit" name="import_directory" value="Import">
+                </div>
             </form>
 
             <script>
