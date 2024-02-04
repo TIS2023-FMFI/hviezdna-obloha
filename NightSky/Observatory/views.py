@@ -1,17 +1,18 @@
 import os
 import tkinter as tk
 from tkinter import filedialog
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.contrib import messages
 
 from .forms import DirectoryForm, ExportForm
 from .models import FitsImage
-from .scripts.first_insert import process_folders_with_fits
-from .scripts.insert import Insert
 from .scripts.create_log import Log
+from .scripts.first_insert import process_folders_with_fits
 from .scripts.generate_sky_map import generate_sky_map
+from .scripts.insert import Insert
 
 
 def open_file_explorer(request):
@@ -42,7 +43,7 @@ def home(request):
 
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r"C:\Users\adamo\Downloads"
+    path = r'C:\Users\adamo\Downloads'
 
     # Get the last added directory path in the archive
     directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
@@ -50,29 +51,47 @@ def import_fits(request):
     last_added_directory_path = os.path.join(path, directories[0]) if directories else None
 
     if request.method == "POST":
-        if "import_last_night" in request.POST and last_added_directory_path:
+        if 'import_last_night' in request.POST and last_added_directory_path:
             directory_path = last_added_directory_path
-            process_and_log_directory(directory_path, request)
+            success, message = process_and_log_directory(directory_path, request)
+            if success:
+                messages.success(request, message)
+            else:
+                messages.error(request, f'Import failed: {message}')
+            request.session['form_submitted'] = 'import_last_night'
 
-        elif form.is_valid():
-            directory_path = form.cleaned_data["directory_path"]
-            process_and_log_directory(directory_path, request)
+        elif 'import_directory' in request.POST:
+            if form.is_valid():
+                directory_path = form.cleaned_data["directory_path"]
+                success, message = process_and_log_directory(directory_path, request)
+                if success:
+                    messages.success(request, message)
+                else:
+                    messages.error(request, f'Import failed: {message}')
+            else:
+                messages.error(request, 'Incorrect input: Please ensure the directory path is correct.')
+            request.session['form_submitted'] = 'import_directory'
 
-    return render(
-        request, "Observatory/import_fits.html", {"form": form, "last_added_directory_path": last_added_directory_path}
-    )
+    return render(request, "Observatory/import_fits.html", {
+        "form": form,
+        "last_added_directory_path": last_added_directory_path
+    })
 
 
 def process_and_log_directory(directory_path, request):
-    first_insert = False
-    if first_insert:
-        process_folders_with_fits(directory_path)
-    else:
-        insert = Insert(directory_path)
-        del insert
-        log = Log(directory_path)
-        log.generate_log()
-    generate_sky_map()
+    try:
+        first_insert = False
+        if first_insert:
+            process_folders_with_fits(directory_path)
+        else:
+            insert = Insert(directory_path)
+            del insert
+            log = Log(directory_path)
+            log.generate_log()
+        generate_sky_map()
+        return True, "Import successful."
+    except Exception as e:
+        return False, str(e)
 
 
 def export_fits(request):  # TODO: REMOVE PRINTS
@@ -95,36 +114,44 @@ def export_fits(request):  # TODO: REMOVE PRINTS
 
 def number_of_nights(request):
     if FitsImage.objects.exists():
-        date_obs_values = FitsImage.objects.values_list("DATE_OBS", flat=True)
-        dates = set(datetime.strptime(date_obs.split("T")[0], "%Y-%m-%d").date() for date_obs in date_obs_values)
-        return len(dates)
-    return 0
+        date_obs_values = FitsImage.objects.values_list('DATE_OBS', flat=True)
+
+        adjusted_dates = set()
+        for date_obs in date_obs_values:
+            date_time = datetime.strptime(date_obs, '%Y-%m-%dT%H:%M:%S.%f')
+
+            if date_time.time() < datetime.strptime('12:00:00', '%H:%M:%S').time():
+                date_time -= timedelta(days=1)
+            adjusted_dates.add(date_time.date())
+
+        return len(adjusted_dates)
+    return None
 
 
 def number_of_frames(request):
     if FitsImage.objects.exists():
-        frames = FitsImage.objects.latest("ID").ID
+        frames = FitsImage.objects.count()
         return frames
-    return 0
+    return None
 
 
 def last_light_frames_night(request):
     if FitsImage.objects.filter(IMAGETYP="LIGHT").exists():
-        light_frames = FitsImage.objects.filter(IMAGETYP="LIGHT").latest("ID").DATE_OBS
+        light_frames = FitsImage.objects.filter(IMAGETYP="LIGHT").latest("DATE_OBS").DATE_OBS
         return light_frames
-    return 0
+    return None
 
 
 def last_calib_frames_night(request):
     if FitsImage.objects.filter(IMAGETYP="CALIB").exists():
-        calib_frames = FitsImage.objects.filter(IMAGETYP="CALIB").latest("ID").DATE_OBS
+        calib_frames = FitsImage.objects.filter(IMAGETYP="CALIB").latest("DATE_OBS").DATE_OBS
         return calib_frames
-    return 0
+    return None
 
 
 def last_ccd_temperature(request):
     if FitsImage.objects.exists():
-        last_fits_image = FitsImage.objects.latest("ID")
+        last_fits_image = FitsImage.objects.latest("DATE_OBS")
         ccd_temp = last_fits_image.CCD_TEMP
         return ccd_temp
-    return 0
+    return None
