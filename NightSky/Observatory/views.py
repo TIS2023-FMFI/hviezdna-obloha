@@ -1,3 +1,5 @@
+import json
+
 import django.db.utils
 from django.shortcuts import render, redirect
 from django.db import connection
@@ -14,6 +16,8 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 import os
+import shutil
+
 
 from datetime import datetime
 import re
@@ -82,35 +86,60 @@ def process_and_log_directory(directory_path, request):
     generate_sky_map()
 
 
-def export_fits(request):  # TODO: REMOVE PRINTS
-    results_length = None
+def export_fits(request):
+    results = None
     if request.method == "POST":
         form = ExportForm(request.POST)
-        if 'sql_query_export' in request.POST:
-            sql_input = add_quotes(request.POST.get('sql_input', None))
+        # SQL query form processing
+        if 'sql_export' in request.POST:
+            target_path = request.POST.get('target_directory_path')
+            if target_path == '':
+                return JsonResponse({'error_message': 'No target directory selected!'})
+            sql_input = add_quotes(request.POST.get('sql_input'))
             try:
                 if is_valid_sql_query(sql_input):
-                    with connection.cursor() as cursor:
-                        cursor.execute(sql_input)
-                        results = cursor.fetchall()
-                        results_length = len(results)
-                        print(f"Results:{len(results)} {results}, ")
+                    results = execute_sql_query(sql_input)
+                    print([r[0] for r in results])
+                    return JsonResponse({'source_paths': [path[0] for path in results], 'target_path': target_path})
                 else:
-                    return render(request, "Observatory/export_fits.html", {"form": form, "errorMessage": "Wrong SQL query"})
+                    return JsonResponse({'error_message': 'Wrong SQL query'})
             except Exception as e:
-                print(f"Error executing the SQL query: {e}")
-                return render(request, "Observatory/export_fits.html", {"form": form, "errorMessage": "Wrong SQL query"})
+                return JsonResponse({'error_message': f"Error executing the SQL query: {e}" })
+        # end of SQL query form processing
 
         elif form.is_valid():
-            fits_image = form.save(commit=False)
-            #print(len(FitsImage.objects.filter()))
-            return JsonResponse({'results_length': results_length})
-            #return redirect("export_fits")
-
+            return render(request, "Observatory/export_fits.html", {"form": form, "results": results})
     else:
         form = ExportForm()
+    return render(request, "Observatory/export_fits.html", {"form": form, "results": results })
 
-    return render(request, "Observatory/export_fits.html", {"form": form, "results_length": results_length})
+def execute_sql_query(sql_input):
+    with connection.cursor() as cursor:
+        cursor.execute(sql_input)
+        return cursor.fetchall()
+
+def copy_data(request):
+    if request.method == 'POST':
+        source_paths = request.POST.getlist('source_paths')
+        target_path = request.POST.get('target_path')
+        print('Source Paths:', source_paths)
+        print('Destination Path:', target_path)
+        if os.path.exists(target_path):
+            status = copy_data_to_target(source_paths, target_path)
+        else:
+            status = "Target directory doesn't exist."
+    return JsonResponse({'status': status})
+
+def copy_data_to_target(source_paths, target_path):
+    for source in source_paths:
+        try:
+            if os.path.exists(source):
+                shutil.copy2(source, target_path)
+            else:
+                return(f"Source file {source} does not exist.")
+        except Exception as e:
+                return(f"Error copying file: {e}")
+    return(f"Copied successfully to {target_path}")
 
 
 def number_of_nights(request):
@@ -152,7 +181,6 @@ def last_ccd_temperature(request):
 
 def is_valid_sql_query(query):
     query = query.strip()
-
     if re.search(r'\b(DELETE|DROP|TRUNCATE)\b', query):
         return False
 

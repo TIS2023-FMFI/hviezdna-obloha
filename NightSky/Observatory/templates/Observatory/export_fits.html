@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
     <title>Charon's Little Helper - Import Fits</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
 
 <style>
@@ -15,6 +16,19 @@
         border: none;
         border-radius: 5px;
         font-size: 18px;
+        resize: both;
+        width: calc(100% - 20px);
+    }
+
+    #target_directory_path {
+        flex-grow: 1;
+        border: none;
+        border-radius: 5px;
+        height: 42px;
+        padding: 0 10px;
+        font-size: 18px;
+        resize: both;
+        width: calc(100% - 22px);
     }
 
     .modal {
@@ -84,6 +98,23 @@
         align-items: center;
         margin: 20px;
     }
+
+    .form-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+
+    .input-group {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 5px;
+        gap: 10px;
+        margin: 10px 0;
+        width: 100%;
+    }
 </style>
 <body>
 
@@ -142,20 +173,42 @@
         <div>
             File Path
         </div>
+
+        <!-- SQL query export form -->
         <div>
             <article class="content_part" style="margin: 0">
-                <h2>SQL query</h2>
-                <form method="post" enctype="multipart/form-data" action="{% url 'export_fits' %}">
+                <h2>SQL query export</h2>
+                <form id="sql_export_form">
                     {% csrf_token %}
                     <div class="form-container">
-                        {# }<label for="sql_input">SQL query:</label>#}
-                        <textarea id="sql_input" name="sql_input" rows="2" cols="150"
-                                  title='Enter your SQL query here. For example:&#10; SELECT "PATH" FROM "Observatory_fitsimage" WHERE "NAXIS" = 2'
-                        >SELECT "PATH" FROM "Observatory_fitsimage" </textarea>
-                        <input type="submit" name="sql_query_export" value="Export">
+                        <div class="input-group">
+                            <label for="target_directory_path">Directory path:</label>
+                            <input type="text" id="target_directory_path" name="target_directory_path"
+                                   placeholder="Enter directory path">
+                            <button type="button" onclick="triggerFileExplorer()">Browse</button>
+                        </div>
+                        <div class="input-group">
+                            <label for="sql_input">SQL query:</label>
+                            <textarea id="sql_input" name="sql_input" rows="2" cols="120"
+                                      title='Enter your SQL query here. For example:&#10; SELECT "PATH" FROM "Observatory_fitsimage" WHERE "NAXIS" = 2'
+                            >SELECT "PATH" FROM "Observatory_fitsimage" </textarea>
+                            <input type="hidden" name="sql_export">
+                            <input type="submit" name="sql_query_export" value="Export"></div>
                     </div>
                 </form>
 
+
+                <script>
+                    function triggerFileExplorer() {
+                        fetch('{% url "open_file_explorer" %}')
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('target_directory_path').value = data.directory_path;
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+
+                </script>
             </article>
         </div>
     </div>
@@ -164,14 +217,14 @@
 <!-- Export Pop-up window -->
 <div id="ExportModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeModal('ExportModal')">&times;</span>
-        <p id="resultsLengthText"></p>
+        <div class="modal-body"></div>
         <div class="button-container">
-            <button class="modalButtons" onclick="closeModal('ExportModal')">CANCEL</button>
-            <button class="modalButtons" onclick="closeModal('ExportModal')">EXPORT</button>
+            <button id="confirmBtn">Confirm</button>
+            <button id="cancelBtn">Cancel</button>
         </div>
     </div>
 </div>
+
 
 <!-- Wrong SQL query Pop-up window -->
 <div id="SQLqueryModal" class="modal">
@@ -181,19 +234,72 @@
     </div>
 </div>
 
+
 <script>
-    <!-- script to pop-up windows -->
 
-    {% if errorMessage is not None %}
-        document.getElementById('ErrorMessage').innerText = 'Error: {{ errorMessage }}';
-        document.getElementById('SQLqueryModal').style.display = 'block';
-    {% endif %}
+    document.getElementById('sql_export_form').onsubmit = function (event) {
+        event.preventDefault();
+        // send serialized data to the server
+        jQuery.ajax({
+            url: '{% url 'export_fits' %}', // URL to Django view that executes the SQL query
+            type: 'POST',
+            data: jQuery(this).serialize(),
+            success: function (response) {
+                if (response.error_message) {
+                    jQuery('#SQLqueryModal #ErrorMessage').text(response.error_message);
+                    document.getElementById('SQLqueryModal').style.display = 'block';
 
-    {% if results_length is not None %}
-        document.getElementById('resultsLengthText').innerText = 'Number of frames to export: {{ results_length }}';
-        document.getElementById('ExportModal').style.display = 'block';
-    {% endif %}
+                } else {
+                    console.log('AJAX success callback');
+                    jQuery('#ExportModal .modal-body').text(`Are you sure you want to export   ${response.source_paths.length}   FITS images into:  "${response.target_path}"?`);
+                    jQuery('#ExportModal').data('source_paths', response.source_paths);
+                    jQuery('#ExportModal').data('target_path', response.target_path);
+                    document.getElementById('ExportModal').style.display = 'block';
+                    console.log('Modal displayed');
+                }
 
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX error callback');
+                console.error('Error:', error);
+                alert('An error occurred');
+            }
+        });
+    }
+
+    // bind to confirm button's click in the modal
+    jQuery('#confirmBtn').on('click', function () {
+        console.log('Confirm button clicked');
+        var sourcePaths = jQuery('#ExportModal').data('source_paths');
+        var targetPath = jQuery('#ExportModal').data('target_path');
+
+        jQuery.ajax({
+            url: '{% url 'copy_data' %}',
+            type: 'POST',
+            traditional: true,
+            data: {
+                'csrfmiddlewaretoken': jQuery('input[name=csrfmiddlewaretoken]').val(),
+                'source_paths': sourcePaths,
+                'target_path': targetPath,
+            },
+            success: function (response) {
+                console.log('Second AJAX success callback');
+                console.log('Response received:', response);
+                document.getElementById('ExportModal').style.display = 'none';
+                alert(response.status);
+            },
+            error: function (xhr, status, error) {
+                console.error('Second AJAX error callback');
+                console.error('Error:', error);
+                alert(`An error occurred while exporting the files. Status: ${status}`);
+            }
+        });
+    });
+
+    jQuery('#cancelBtn').on('click', function () {
+        console.log('Cancel button clicked');
+        document.getElementById('ExportModal').style.display = 'none';
+    });
 
     function closeModal(modalId) {
         var modal = document.getElementById(modalId);
@@ -201,7 +307,6 @@
     }
 
 </script>
-
 </body>
 
 </html>
