@@ -19,7 +19,7 @@ import os
 import shutil
 
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 
 
@@ -142,41 +142,49 @@ def copy_data_to_target(source_paths, target_path):
     return(f"Copied successfully to {target_path}")
 
 
+
 def number_of_nights(request):
     if FitsImage.objects.exists():
         date_obs_values = FitsImage.objects.values_list('DATE_OBS', flat=True)
-        dates = set(datetime.strptime(date_obs.split('T')[0], '%Y-%m-%d').date() for date_obs in date_obs_values)
-        return len(dates)
-    return 0
 
+        adjusted_dates = set()
+        for date_obs in date_obs_values:
+            date_time = datetime.strptime(date_obs, '%Y-%m-%dT%H:%M:%S.%f')
+
+            if date_time.time() < datetime.strptime('12:00:00', '%H:%M:%S').time():
+                date_time -= timedelta(days=1)
+            adjusted_dates.add(date_time.date())
+
+        return len(adjusted_dates)
+    return None
 
 def number_of_frames(request):
     if FitsImage.objects.exists():
-        frames = FitsImage.objects.latest("ID").ID
+        frames = FitsImage.objects.count()
         return frames
-    return 0
+    return None
 
 
 def last_light_frames_night(request):
     if FitsImage.objects.filter(IMAGETYP="LIGHT").exists():
-        light_frames = FitsImage.objects.filter(IMAGETYP="LIGHT").latest("ID").DATE_OBS
+        light_frames = FitsImage.objects.filter(IMAGETYP="LIGHT").latest("DATE_OBS").DATE_OBS
         return light_frames
-    return 0
+    return None
 
 
 def last_calib_frames_night(request):
     if FitsImage.objects.filter(IMAGETYP="CALIB").exists():
-        calib_frames = FitsImage.objects.filter(IMAGETYP="CALIB").latest("ID").DATE_OBS
+        calib_frames = FitsImage.objects.filter(IMAGETYP="CALIB").latest("DATE_OBS").DATE_OBS
         return calib_frames
-    return 0
+    return None
 
 
 def last_ccd_temperature(request):
     if FitsImage.objects.exists():
-        last_fits_image = FitsImage.objects.latest("ID")
+        last_fits_image = FitsImage.objects.latest("DATE_OBS")
         ccd_temp = last_fits_image.CCD_TEMP
         return ccd_temp
-    return 0
+    return None
 
 
 def is_valid_sql_query(query):
