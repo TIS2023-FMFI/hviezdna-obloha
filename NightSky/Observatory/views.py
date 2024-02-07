@@ -1,4 +1,7 @@
+import json
+import django.db.utils
 from django.shortcuts import render, redirect
+from django.db import connection
 from django.http import JsonResponse
 
 from .forms import DirectoryForm, ExportForm
@@ -10,9 +13,15 @@ from .scripts.generate_sky_map import generate_sky_map
 
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import messagebox
 import os
 from django.contrib import messages
 from datetime import datetime, timedelta
+import shutil
+
+from datetime import datetime, timedelta
+import re
+
 
 
 def open_file_explorer(request):
@@ -43,7 +52,7 @@ def home(request):
 
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r'C:\Users\adamo\Downloads'
+    path = r'D:\TIS\20230503'
 
     # Get the last added directory path in the archive
     directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
@@ -94,22 +103,61 @@ def process_and_log_directory(directory_path, request):
         return False, str(e)
 
 
-def export_fits(request):  # TODO: REMOVE PRINTS
+def export_fits(request):
+    results = None
     if request.method == "POST":
         form = ExportForm(request.POST)
-        # print(form.data)
+        # SQL query form processing
+        if 'sql_export' in request.POST:
+            target_path = request.POST.get('target_directory_path')
+            if target_path == '':
+                return JsonResponse({'error_message': 'No target directory selected!'})
+            sql_input = add_quotes(request.POST.get('sql_input'))
+            try:
+                if is_valid_sql_query(sql_input):
+                    results = execute_sql_query(sql_input)
+                    print([r[0] for r in results])
+                    return JsonResponse({'source_paths': [path[0] for path in results], 'target_path': target_path})
+                else:
+                    return JsonResponse({'error_message': 'Wrong SQL query'})
+            except Exception as e:
+                return JsonResponse({'error_message': f"Error executing the SQL query: {e}" })
+        # end of SQL query form processing
 
-        if form.is_valid():
-            fits_image = form.save(commit=False)
-            # print(fit)
-            print(len(FitsImage.objects.filter()))
-
-            return redirect("export_fits")
-
+        elif form.is_valid():
+            return render(request, "Observatory/export_fits.html", {"form": form, "results": results})
     else:
         form = ExportForm()
+    return render(request, "Observatory/export_fits.html", {"form": form, "results": results })
 
-    return render(request, "Observatory/export_fits.html", {"form": form})
+def execute_sql_query(sql_input):
+    with connection.cursor() as cursor:
+        cursor.execute(sql_input)
+        return cursor.fetchall()
+
+def copy_data(request):
+    if request.method == 'POST':
+        source_paths = request.POST.getlist('source_paths')
+        target_path = request.POST.get('target_path')
+        print('Source Paths:', source_paths)
+        print('Destination Path:', target_path)
+        if os.path.exists(target_path):
+            status = copy_data_to_target(source_paths, target_path)
+        else:
+            status = "Target directory doesn't exist."
+    return JsonResponse({'status': status})
+
+def copy_data_to_target(source_paths, target_path):
+    for source in source_paths:
+        try:
+            if os.path.exists(source):
+                shutil.copy2(source, target_path)
+            else:
+                return(f"Source file {source} does not exist.")
+        except Exception as e:
+                return(f"Error copying file: {e}")
+    return(f"Copied successfully to {target_path}")
+
 
 
 def number_of_nights(request):
@@ -155,3 +203,38 @@ def last_ccd_temperature(request):
         ccd_temp = last_fits_image.CCD_TEMP
         return ccd_temp
     return None
+
+
+def is_valid_sql_query(query):
+    query = query.strip()
+    if re.search(r'\b(DELETE|DROP|TRUNCATE)\b', query):
+        return False
+
+    if 'SELECT "PATH" FROM "Observatory_fitsimage"' in query:
+        return True
+
+    return False
+
+def add_quotes(query):
+    columns = [
+        'ID', 'NAXIS', 'NAXIS1', 'NAXIS2', 'IMAGETYP', 'FILTER', 'OBJECT_NAME',
+        'SERIES', 'NOTES', 'DATE_OBS', 'MJD_OBS', 'EXPTIME', 'CCD_TEMP',
+        'XBINNING', 'YBINNING', 'XORGSUBF', 'YORGSUBF', 'MODE', 'GAIN',
+        'RD_NOISE', 'OBSERVER', 'RA', 'DEC', 'RA_PNT', 'DEC_PNT', 'AZIMUTH',
+        'ELEVATIO', 'AIRMASS', 'RATRACK', 'DECTRACK', 'PHASE', 'RANGE',
+        'PATH'
+    ]
+    query_words = query.split()
+    print(query_words)
+
+    for i in range(len(query_words)):
+        word = query_words[i].upper()
+        if word in columns:
+            query_words[i] = (f'"{word.upper()}"')
+    updated_query = ' '.join(query_words)
+
+    # Add quotes to table name if not already present
+    updated_query = re.sub(r'FROM (\w+)', r'FROM "\1"', updated_query, flags=re.IGNORECASE)
+
+    return updated_query
+
