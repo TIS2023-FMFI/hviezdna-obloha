@@ -24,69 +24,88 @@
         }
     }
 </script>
-    <div class="title_a_navbar">
-        <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
-        <nav>
-            <a href="{% url 'import_fits' %}">Import Images</a>
-            <a href="{% url 'export_fits' %}">Export Images</a>
-        </nav>
-    </div>
 
-    <div class="contents">
-        <div class="content_part">
-            <h2>Export FITS Images</h2>
-            <form method="post" id="ExportForm" action="{% url 'export_fits' %}">
-                {% csrf_token %}
-                {{ form.errors }}
+<div class="title_a_navbar">
+    <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
+    <nav>
+        <a href="{% url 'import_fits' %}">Import Images</a>
+        <a href="{% url 'export_fits' %}">Export Images</a>
+    </nav>
+</div>
 
-                <script>
-                    document.write(
-                        "<div class=\"checkbox-container\">" +
-                    "{% for field in form %}" +
-                        "<label>" +
-                        "<input type=\"checkbox\" id=\"checkbox-{{ field.auto_id }}\" name=\"{{ field.name }}\"" +
-                        "value=\"{{ field.value }}\" onchange=\"toggleVisibility('{{ field.auto_id }}')\">" +
-                        "{{ field.label }}" +
-                        "</label>" +
-                    "{% endfor %}" +
-                    "</div>"
-                    )
-                </script>
+<div class="contents">
+    <div class="content_part">
+        <h2>Export FITS Images</h2>
 
-            {#    <div class="checkbox-container">#}
-            {#        {% for field in form %}#}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_div }}
+            {#            <label for="{{ form.object.id_for_label }}">Object:</label><br>#}
             {#            <label>#}
-            {#                <input type="checkbox" id="checkbox-{{ field.auto_id }}" name="{{ field.name }}"#}
-            {#                       value="{{ field.value }}" onchange="toggleVisibility('{{ field.auto_id }}')">#}
-            {#                {{ field.label }}#}
+            {#                <select name="{{ form.object.name }}" multiple>#}
+            {#                    {% for value, label in form.object.field.choices %}#}
+            {#                        <option value="{{ value }}"#}
+            {#                                {% if value in form.object.data %}selected{% endif %}>{{ label }}</option>#}
+            {#                    {% endfor %}#}
+            {#                </select>#}
             {#            </label>#}
-            {#        {% endfor %}#}
-            {#    </div>#}
+            {#            <br>#}
+            <!-- Other fields here -->
+            <button type="submit">Submit</button>
+        </form>
 
-                {% for field in form %}
-                    <div hidden="hidden" id="div-{{ field.auto_id }}" class="field-input">
-                        <label>
-                            {{ field.label }}
-                        </label>
-                        {{ field }}
-                    </div>
-                {% endfor %}
-                <button type="submit" style="margin: 10px">Submit</button>
+        {#        <form method="post" id="ExportForm" action="{% url 'export_fits' %}">#}
+        {#            {% csrf_token %}#}
+        {#            {{ form.errors }}#}
+        {##}
+        {#            <script>#}
+        {#                document.write(#}
+        {#                    "<div class=\"checkbox-container\">" +#}
+        {#                    "{% for field in form %}" +#}
+        {#                        "<label>" +#}
+        {#                        "<input type=\"checkbox\" id=\"checkbox-{{ field.auto_id }}\" name=\"{{ field.name }}\"" +#}
+        {#                        "value=\"{{ field.value }}\" onchange=\"toggleVisibility('{{ field.auto_id }}')\">" +#}
+        {#                        "{{ field.label }}" +#}
+        {#                        "</label>" +#}
+        {#                        "{% endfor %}" +#}
+        {#                    "</div>"#}
+        {#                )#}
+        {#            </script>#}
+        {##}
+        {#            <div class="checkbox-container">#}
+        {#                {% for field in form %}#}
+        {#                    <label>#}
+        {#                        <input type="checkbox" id="checkbox-{{ field.auto_id }}" name="{{ field.name }}"#}
+        {#                               value="{{ field.value }}" onchange="toggleVisibility('{{ field.auto_id }}')">#}
+        {#                        {{ field.label }}#}
+        {#                    </label>#}
+        {#                {% endfor %}#}
+        {#            </div>#}
+        {##}
+        {#            {% for field in form %}#}
+        {#                <div hidden="hidden" id="div-{{ field.auto_id }}" class="field-input">#}
+        {#                    <label>#}
+        {#                        {{ field.label }}#}
+        {#                    </label>#}
+        {#                    {{ field. }}#}
+        {#                </div>#}
+        {#            {% endfor %}#}
+        {#            <button type="submit" style="margin: 10px">Submit</button>#}
+        {#        </form>#}
+
+        <div>
+            File Path
+        </div>
+
+        <div>
+            SQL Query
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <button type="submit">Apply filter</button>
             </form>
-
-            <div>
-                File Path
-            </div>
-
-            <div>
-                SQL Query
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <button type="submit">Apply filter</button>
-                </form>
-            </div>
         </div>
     </div>
+</div>
 </body>
 
 </html>

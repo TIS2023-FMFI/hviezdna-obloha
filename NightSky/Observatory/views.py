@@ -43,7 +43,7 @@ def home(request):
 
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r'C:\Users\adamo\Downloads'
+    path = r"C:\UNI\TIS"
 
     # Get the last added directory path in the archive
     directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
@@ -51,31 +51,30 @@ def import_fits(request):
     last_added_directory_path = os.path.join(path, directories[0]) if directories else None
 
     if request.method == "POST":
-        if 'import_last_night' in request.POST and last_added_directory_path:
+        if "import_last_night" in request.POST and last_added_directory_path:
             directory_path = last_added_directory_path
             success, message = process_and_log_directory(directory_path, request)
             if success:
                 messages.success(request, message)
             else:
-                messages.error(request, f'Import failed: {message}')
-            request.session['form_submitted'] = 'import_last_night'
+                messages.error(request, f"Import failed: {message}")
+            request.session["form_submitted"] = "import_last_night"
 
-        elif 'import_directory' in request.POST:
+        elif "import_directory" in request.POST:
             if form.is_valid():
                 directory_path = form.cleaned_data["directory_path"]
                 success, message = process_and_log_directory(directory_path, request)
                 if success:
                     messages.success(request, message)
                 else:
-                    messages.error(request, f'Import failed: {message}')
+                    messages.error(request, f"Import failed: {message}")
             else:
-                messages.error(request, 'Incorrect input: Please ensure the directory path is correct.')
-            request.session['form_submitted'] = 'import_directory'
+                messages.error(request, "Incorrect input: Please ensure the directory path is correct.")
+            request.session["form_submitted"] = "import_directory"
 
-    return render(request, "Observatory/import_fits.html", {
-        "form": form,
-        "last_added_directory_path": last_added_directory_path
-    })
+    return render(
+        request, "Observatory/import_fits.html", {"form": form, "last_added_directory_path": last_added_directory_path}
+    )
 
 
 def process_and_log_directory(directory_path, request):
@@ -94,15 +93,20 @@ def process_and_log_directory(directory_path, request):
         return False, str(e)
 
 
+def filter_fits_images(form_data):
+    ...
+
+
 def export_fits(request):  # TODO: REMOVE PRINTS
     if request.method == "POST":
         form = ExportForm(request.POST)
-        # print(form.data)
+        print(form.data)
 
         if form.is_valid():
-            fits_image = form.save(commit=False)
-            # print(fit)
-            print(len(FitsImage.objects.filter()))
+            print(form.cleaned_data)
+            # fits_image = form.save(commit=False)
+            # print(fits_image)
+            # print(len(FitsImage.objects.filter(form.data)))
 
             return redirect("export_fits")
 
@@ -114,13 +118,13 @@ def export_fits(request):  # TODO: REMOVE PRINTS
 
 def number_of_nights(request):
     if FitsImage.objects.exists():
-        date_obs_values = FitsImage.objects.values_list('DATE_OBS', flat=True)
+        date_obs_values = FitsImage.objects.values_list("DATE_OBS", flat=True)
 
         adjusted_dates = set()
         for date_obs in date_obs_values:
-            date_time = datetime.strptime(date_obs, '%Y-%m-%dT%H:%M:%S.%f')
+            date_time = datetime.strptime(date_obs, "%Y-%m-%dT%H:%M:%S.%f")
 
-            if date_time.time() < datetime.strptime('12:00:00', '%H:%M:%S').time():
+            if date_time.time() < datetime.strptime("12:00:00", "%H:%M:%S").time():
                 date_time -= timedelta(days=1)
             adjusted_dates.add(date_time.date())
 
