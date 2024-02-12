@@ -11,6 +11,7 @@ class DirectoryForm(forms.Form):
     )
 
 
+# TODO: zlepsit medzery v inpute
 class MultipleStringsField(forms.CharField):
     def to_python(self, value):
         value = value.replace(" ", "")
@@ -154,49 +155,51 @@ class MultipleFloatIntervalsField(forms.CharField):
 
 
 class ExportForm(forms.Form):
-    NAXIS = MultipleIntegerIntervalsField()
-    NAXIS1 = MultipleIntegerIntervalsField()
-    NAXIS2 = MultipleIntegerIntervalsField()
+    NAXIS = MultipleIntegerIntervalsField(required=False)
+    NAXIS1 = MultipleIntegerIntervalsField(required=False)
+    NAXIS2 = MultipleIntegerIntervalsField(required=False)
 
-    IMAGETYP = MultipleStringsField()
-    FILTER = MultipleStringsField()
+    IMAGETYP = MultipleStringsField(required=False)
+    FILTER = MultipleStringsField(required=False)
     # OBJECT_NAME = MultipleStringsField()
-    SERIES = MultipleStringsField()
-    DATE_OBS = MultipleStringsField()
+    SERIES = MultipleIntegerIntervalsField(required=False)
+    DATE_OBS = MultipleStringsField(required=False)
 
-    MJD_OBS = MultipleFloatIntervalsField()
-    EXPTIME = MultipleFloatIntervalsField()
-    CCD_TEMP = MultipleFloatIntervalsField()
+    MJD_OBS = MultipleFloatIntervalsField(required=False)
+    EXPTIME = MultipleFloatIntervalsField(required=False)
+    CCD_TEMP = MultipleFloatIntervalsField(required=False)
 
-    XBINNING = MultipleIntegerIntervalsField()
-    YBINNING = MultipleIntegerIntervalsField()
-    XORGSUBF = MultipleIntegerIntervalsField()
-    YORGSUBF = MultipleIntegerIntervalsField()
-    MODE = MultipleIntegerIntervalsField()
+    XBINNING = MultipleIntegerIntervalsField(required=False)
+    YBINNING = MultipleIntegerIntervalsField(required=False)
+    XORGSUBF = MultipleIntegerIntervalsField(required=False)
+    YORGSUBF = MultipleIntegerIntervalsField(required=False)
+    MODE = MultipleIntegerIntervalsField(required=False)
 
-    GAIN = MultipleFloatIntervalsField()
-    RD_NOISE = MultipleFloatIntervalsField()
+    GAIN = MultipleFloatIntervalsField(required=False)
+    RD_NOISE = MultipleFloatIntervalsField(required=False)
 
-    OBSERVER = MultipleStringsField()
+    OBSERVER = MultipleStringsField(required=False)
 
-    RA = MultipleFloatIntervalsField()
-    DEC = MultipleFloatIntervalsField()
-    RA_PNT = MultipleFloatIntervalsField()
-    DEC_PNT = MultipleFloatIntervalsField()
-    AZIMUTH = MultipleFloatIntervalsField()
-    ELEVATIO = MultipleFloatIntervalsField()
-    AIRMASS = MultipleFloatIntervalsField()
-    RATRACK = MultipleFloatIntervalsField()
-    DECTRACK = MultipleFloatIntervalsField()
-    PHASE = MultipleFloatIntervalsField()
-    RANGE = MultipleFloatIntervalsField()
+    RA = MultipleFloatIntervalsField(required=False)
+    DEC = MultipleFloatIntervalsField(required=False)
+    RA_PNT = MultipleFloatIntervalsField(required=False)
+    DEC_PNT = MultipleFloatIntervalsField(required=False)
+    AZIMUTH = MultipleFloatIntervalsField(required=False)
+    ELEVATIO = MultipleFloatIntervalsField(required=False)
+    AIRMASS = MultipleFloatIntervalsField(required=False)
+    RATRACK = MultipleFloatIntervalsField(required=False)
+    DECTRACK = MultipleFloatIntervalsField(required=False)
+    PHASE = MultipleFloatIntervalsField(required=False)
+    RANGE = MultipleFloatIntervalsField(required=False)
 
     object_name_choices = [
         (image.ID, image.OBJECT_NAME)
         for image in FitsImage.objects.all().distinct("OBJECT_NAME").order_by("OBJECT_NAME")
     ]
 
-    OBJECT_NAME = forms.MultipleChoiceField(choices=object_name_choices, widget=forms.CheckboxSelectMultiple)
+    OBJECT_NAME = forms.MultipleChoiceField(
+        choices=object_name_choices, widget=forms.CheckboxSelectMultiple, required=False
+    )
 
     # class Meta:
     #     model = FitsImage

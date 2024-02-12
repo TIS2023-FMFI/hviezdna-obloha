@@ -3,11 +3,19 @@ import tkinter as tk
 from tkinter import filedialog
 from datetime import datetime, timedelta
 
+from django.forms import MultipleChoiceField
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.db.models import Q
 
-from .forms import DirectoryForm, ExportForm
+from .forms import (
+    DirectoryForm,
+    ExportForm,
+    MultipleIntegerIntervalsField,
+    MultipleFloatIntervalsField,
+    MultipleStringsField,
+)
 from .models import FitsImage
 from .scripts.create_log import Log
 from .scripts.first_insert import process_folders_with_fits
@@ -95,15 +103,47 @@ def process_and_log_directory(directory_path, request):
 
 def filter_fits_images(form_data):
     ...
+    # Entry.objects.values_list("id", flat=True).order_by("id")
 
 
 def export_fits(request):  # TODO: REMOVE PRINTS
     if request.method == "POST":
         form = ExportForm(request.POST)
-        print(form.data)
 
         if form.is_valid():
             print(form.cleaned_data)
+            queryset = FitsImage.objects.all()
+
+            for field_name, field in form.fields.items():
+                field_input = form.cleaned_data.get(field_name)
+
+                if not field_input:
+                    continue
+
+                if isinstance(field, MultipleIntegerIntervalsField):
+                    exact_values, intervals = field_input
+                    q_objects = Q(**{"%s__in" % field_name: exact_values + intervals})
+                    queryset = queryset.filter(q_objects)
+
+                if isinstance(field, MultipleFloatIntervalsField):
+                    exact_values, intervals = field_input
+                    q_objects = Q(**{"%s__in" % field_name: exact_values})
+
+                    for left_endpoint, right_endpoint in intervals:
+                        q_objects |= Q(**{"%s__range" % field_name: (left_endpoint, right_endpoint)})
+
+                    queryset = queryset.filter(q_objects)
+
+                if isinstance(field, (MultipleStringsField, MultipleChoiceField)):
+                    q_objects = Q(**{"%s__in" % field_name: field_input})
+                    queryset = queryset.filter(q_objects)
+
+            paths = queryset.values_list("PATH", flat=True).order_by("PATH")
+
+            print("---- PATHS ----")
+            print(paths)
+            print(len(paths), "\n--------")
+
             # fits_image = form.save(commit=False)
             # print(fits_image)
             # print(len(FitsImage.objects.filter(form.data)))
