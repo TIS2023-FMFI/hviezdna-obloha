@@ -6,6 +6,7 @@ from ..models import FitsImage
 
 class Insert:
     def __init__(self, path):
+        self.inserted_rows = 0
         self.path = path
         self.parameters = [
             "NAXIS",
@@ -39,24 +40,35 @@ class Insert:
             "PHASE",
             "RANGE",
         ]
+        self.headers = []
         self.query_dicts = []
         self.parse()
-        self.insert()
+        self.inserted_rows = self.insert()
 
     def insert(self):
         instances = [FitsImage(**v) for v in self.query_dicts]
         try:
+            count_before = FitsImage.objects.count()
             FitsImage.objects.bulk_create(instances, ignore_conflicts=True)
-        except IntegrityError as e:
-            print(f"IntegrityError: {e}")
+            count_after = FitsImage.objects.count()
+            return count_after - count_before
+        except IntegrityError:
+            return 0
 
     def parse(self):
         for image in os.listdir(self.path):
             try:
                 p = Parsing(self.path + "/" + image, self.parameters)
                 self.query_dicts.append(p.get_values_dict())
+                self.headers.append(p.get_header())
             except OSError:
                 pass
+
+    def get_headers(self):
+        return self.headers
+
+    def get_number_of_inserted_rows(self):
+        return self.inserted_rows
 
 
 def time_to_decimal(time_string):
@@ -122,3 +134,6 @@ class Parsing:
 
     def get_values_dict(self):
         return self.values
+
+    def get_header(self):
+        return self.header

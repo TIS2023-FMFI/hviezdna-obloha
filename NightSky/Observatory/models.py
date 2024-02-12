@@ -4,10 +4,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class FitsImage(models.Model):
     ID = models.AutoField(primary_key=True)
-    NAXIS = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(10)],
-        blank=True,
-        null=True)
+    NAXIS = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10)], blank=True, null=True)
     NAXIS1 = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(100000)],
         blank=True,
@@ -18,30 +15,12 @@ class FitsImage(models.Model):
         blank=True,
         null=True,
     )
-    IMAGETYP = models.CharField(
-        max_length=30,
-        blank=True,
-        null=True)
-    FILTER = models.CharField(
-        max_length=3,
-        blank=True,
-        null=True)
-    OBJECT_NAME = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True)
-    SERIES = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-        blank=True,
-        null=True)
-    NOTES = models.CharField(
-        max_length=1000,
-        blank=True,
-        null=True)
-    DATE_OBS = models.CharField(
-        max_length=23,
-        blank=True,
-        null=True)
+    IMAGETYP = models.CharField(max_length=30, blank=True, null=True)
+    FILTER = models.CharField(max_length=3, blank=True, null=True)
+    OBJECT_NAME = models.CharField(max_length=100, blank=True, null=True)
+    SERIES = models.CharField(max_length=100, blank=True, null=True)
+    NOTES = models.CharField(max_length=1000, blank=True, null=True)
+    DATE_OBS = models.CharField(max_length=23, blank=True, null=True)
     MJD_OBS = models.FloatField(
         validators=[MinValueValidator(0), MaxValueValidator(100000.00000000)],
         blank=True,
@@ -57,14 +36,8 @@ class FitsImage(models.Model):
         blank=True,
         null=True,
     )
-    XBINNING = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-        blank=True,
-        null=True)
-    YBINNING = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-        blank=True,
-        null=True)
+    XBINNING = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)], blank=True, null=True)
+    YBINNING = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)], blank=True, null=True)
     XORGSUBF = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(100000)],
         blank=True,
@@ -75,10 +48,7 @@ class FitsImage(models.Model):
         blank=True,
         null=True,
     )
-    MODE = models.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(5)],
-        blank=True,
-        null=True)
+    MODE = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)], blank=True, null=True)
     GAIN = models.FloatField(
         validators=[MinValueValidator(0), MaxValueValidator(100.00)],
         blank=True,
@@ -89,10 +59,7 @@ class FitsImage(models.Model):
         blank=True,
         null=True,
     )
-    OBSERVER = models.CharField(
-        max_length=30,
-        blank=True,
-        null=True)
+    OBSERVER = models.CharField(max_length=30, blank=True, null=True)
     RA = models.FloatField(
         validators=[MinValueValidator(0), MaxValueValidator(360.00)],
         blank=True,
