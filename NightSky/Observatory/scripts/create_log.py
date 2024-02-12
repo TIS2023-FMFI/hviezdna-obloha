@@ -6,11 +6,10 @@ from .parse_for_log import ParseForLog
 
 
 class Log:
-    def __init__(self, headers, path):
+    def __init__(self, path):
         self.num = 1
         self.COLUMNS = 15
         self.rows = [['AGO 0.7m observation log'] + [''] * self.COLUMNS]
-        self.headers = headers
         self.path = path
 
         self.NAMES = ['Observer', 'Date', 'CCD Temp', 'Weather', 'Moon', 'Remark']
@@ -34,8 +33,8 @@ class Log:
         self.add_data_to_header()
 
     def fill_log(self):
-        for header in self.headers:
-            log_row = ParseForLog(header, self.num)
+        for image in os.listdir(self.path):
+            log_row = ParseForLog(self.path + '/' + image, self.num)
             if log_row.has_header():
                 log_row.add_data()
                 self.rows.append(log_row.get_data())
@@ -44,8 +43,6 @@ class Log:
 
     def add_data_to_header(self):
         log_row = self.pick_one_fits()
-        if log_row is None:
-            return
         self.rows[1][1] = log_row.get_value_of('OBSERVER')
 
         date_obs = Time(log_row.get_value_of('DATE-OBS'), format='fits')
@@ -55,11 +52,10 @@ class Log:
         self.rows[3][1] = log_row.get_value_of('CCD-TEMP')
 
     def pick_one_fits(self):
-        if self.headers:
-            for image in self.headers:
-                if 'T' in image['DATE-OBS']:
-                    return ParseForLog(image, self.num)
-        return None
+        for image in os.listdir(self.path):
+            log_row = ParseForLog(self.path + '/' + image, self.num)
+            if isinstance(log_row, ParseForLog) and log_row.has_header():
+                return log_row
 
     def add_to_series_counts(self, log_row):
         key = log_row.get_data_for_n()
