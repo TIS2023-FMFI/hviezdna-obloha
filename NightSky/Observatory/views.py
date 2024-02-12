@@ -2,6 +2,7 @@ import django.db.utils
 from django.shortcuts import render, redirect
 from django.db import connection
 from django.http import JsonResponse
+from django.contrib import messages
 
 from .forms import DirectoryForm, ExportForm
 from .models import FitsImage
@@ -45,37 +46,46 @@ def home(request):
 
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r'C:\Users\adamo\Downloads'
+    path = r'D:'
 
     # Get the last added directory path in the archive
     directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
     directories.sort(key=lambda x: os.path.getctime(os.path.join(path, x)), reverse=True)
     last_added_directory_path = os.path.join(path, directories[0]) if directories else None
+    inserted_rows = 0
 
     if request.method == "POST":
         if 'import_last_night' in request.POST and last_added_directory_path:
             directory_path = last_added_directory_path
-            process_and_log_directory(directory_path, request)
+            inserted_rows = process_and_log_directory(directory_path, request)
         elif form.is_valid():
             directory_path = form.cleaned_data["directory_path"]
-            process_and_log_directory(directory_path, request)
+            inserted_rows = process_and_log_directory(directory_path, request)
 
+        messages.success(request, "Import successful")
     return render(request, "Observatory/import_fits.html", {
         "form": form,
-        "last_added_directory_path": last_added_directory_path
+        "last_added_directory_path": last_added_directory_path,
+        "inserted_rows": inserted_rows
     })
 
 
 def process_and_log_directory(directory_path, request):
     first_insert = False
     if first_insert:
-        process_folders_with_fits(directory_path)
+        inserted_rows = process_folders_with_fits(directory_path)
     else:
         insert = Insert(directory_path)
+        inserted_rows = insert.get_number_of_inserted_rows()
+
+        if inserted_rows != 0:
+            log = Log(insert.headers, directory_path)
+            log.generate_log()
+            del log
+
         del insert
-        log = Log(directory_path)
-        log.generate_log()
     generate_sky_map()
+    return inserted_rows
 
 
 def export_fits(request):  # TODO: REMOVE PRINTS
