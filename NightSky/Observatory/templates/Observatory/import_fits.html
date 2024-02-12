@@ -42,7 +42,7 @@
 
             </form>
         </article>
-        <article class="content_part" style="margin: 0">
+        <article class="content_part" {% if inserted_rows == 0 %}style="margin: 0"{% endif %}>
             <form method="post" action="{% url 'import_fits' %}">
 
                 {% csrf_token %}
@@ -73,6 +73,11 @@
             }
             </script>
         </article>
+        {% if inserted_rows != 0 %}<article class="content_part" style="margin: 0">
+            <h3>Messages:</h3>
+            Opened and imported Fits images: {{ inserted_rows }}
+        </article>
+        {% endif %}
     </div>
 </body>
 </html>
