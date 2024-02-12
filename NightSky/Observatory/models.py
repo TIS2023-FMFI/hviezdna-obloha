@@ -30,8 +30,8 @@ class FitsImage(models.Model):
         max_length=100,
         blank=True,
         null=True)
-    SERIES = models.CharField(
-        max_length=100,
+    SERIES = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
         blank=True,
         null=True)
     NOTES = models.CharField(

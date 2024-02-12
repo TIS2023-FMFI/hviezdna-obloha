@@ -1,13 +1,24 @@
+from astropy.io import fits
 from astropy.time import Time
 
 
 class ParseForLog:
-    def __init__(self, header, num):
+    def __init__(self, image_path, num):
+
         self.series = ''
         self.obj = ''
         self.filter = ''
+
+        try:
+            my_fits = fits.open(image_path, ignore_missing_simple=True)
+            self.header = my_fits[0].header
+            my_fits.close()
+        except OSError:
+            self.data = ''
+            self.header = None
+            return
+
         self.NUM_OF_EMPTY_COLUMNS = 4
-        self.header = header
         self.data = [num]
 
     def get_data(self):
@@ -19,11 +30,8 @@ class ParseForLog:
 
         self.add_object_series()
 
-        try:
-            date_obs = Time(self.get_value_of('DATE-OBS'), format='fits')
-            self.data.append(date_obs.datetime.strftime('%H:%M:%S'))
-        except ValueError:
-            self.data.append('')
+        date_obs = Time(self.get_value_of('DATE-OBS'), format='fits')
+        self.data.append(date_obs.datetime.strftime('%H:%M:%S'))
 
         self.filter = self.get_value_of('FILTER')
         self.data.append(self.filter)
