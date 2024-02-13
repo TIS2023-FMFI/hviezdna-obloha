@@ -37,118 +37,129 @@
 <div class="contents">
     <div class="content_part">
         <h2>Export FITS Images</h2>
+    </div>
+    <div class="content_part">
+
 
         <form method="post">
             {% csrf_token %}
             {{ form.as_div }}
-<!--?            {# <label for="{{ form.object.id_for_label }}">Object:</label><br>#}-->
-<!--?            {# <label>#}-->
-<!--?            {# <select name="{{ form.object.name }}" multiple>#}-->
-<!--?                {# {% for value, label in form.object.field.choices %}#}-->
-<!--?                {#-->
-<!--?                <option value="{{ value }}" #}-->
-<!--?                        {# {% if value in form.object.data %}selected{% endif %}>{{ label }}-->
-<!--?                </option>-->
-<!--?                #}-->
-<!--?                {# {% endfor %}#}-->
-<!--?                {# </select>#}-->
-<!--?            {# </label>#}-->
-<!--?            {# <br>#}-->
+            <!--?            {# <label for="{{ form.object.id_for_label }}">Object:</label><br>#}-->
+            <!--?            {# <label>#}-->
+            <!--?            {# <select name="{{ form.object.name }}" multiple>#}-->
+            <!--?                {# {% for value, label in form.object.field.choices %}#}-->
+            <!--?                {#-->
+            <!--?                <option value="{{ value }}" #}-->
+            <!--?                        {# {% if value in form.object.data %}selected{% endif %}>{{ label }}-->
+            <!--?                </option>-->
+            <!--?                #}-->
+            <!--?                {# {% endfor %}#}-->
+            <!--?                {# </select>#}-->
+            <!--?            {# </label>#}-->
+            <!--?            {# <br>#}-->
             <!-- Other fields here -->
+            <div class="sql_form-container">
+                <div class="input-group">
+                    <label for="target_directory_path">Directory path:</label>
+                    <input type="text" id="target_directory_path" name="target_directory_path"
+                           placeholder="Enter directory path">
+                    <button type="button" onclick="triggerFileExplorer()">Browse</button>
+                </div>
+
+            </div>
+
             <button type="submit">Submit</button>
+
         </form>
+    </div>
+        <!--?        {#-->
+        <!--?        <form method="post" id="ExportForm" action="{% url 'export_fits' %}">#}-->
+        <!--?            {# {% csrf_token %}#}-->
+        <!--?            {# {{ form.errors }}#}-->
+        <!--?            {##}-->
+        <!--?            {#-->
+        <!--?            <script>#-->
+        <!--?            }-->
+        <!--?            {#-->
+        <!--?                document.write(-->
+        <!--?            #-->
+        <!--?            }-->
+        <!--?            {#-->
+        <!--?                "<div class=\"checkbox-container\">" +-->
+        <!--?            #-->
+        <!--?            }-->
+        <!--?            {#-->
+        <!--?                "{% for field in form %}" +-->
+        <!--?            #-->
+        <!--?            }-->
+        <!--?            {#-->
+        <!--?                "<label>" +-->
+        <!--?            #-->
+        <!--?            }-->
+        <!--?            {#-->
+        <!--?                "<input type=\"checkbox\" id=\"checkbox-{{ field.auto_id }}\" name=\"{{ field.name }}\"" +-->
+        <!--?            #-->
+        <!--?            }-->
+        <!--?            {#-->
+        <!--?                "value=\"{{ field.value }}\" onchange=\"toggleVisibility('{{ field.auto_id }}')\">" +-->
+        <!--?            #-->
+        <!--?            }-->
+        <!--?            {#-->
+        <!--?                "{{ field.label }}" +-->
+        <!--?            #-->
+        <!--?            }-->
+        <!--?            {#-->
+        <!--?                "</label>" +-->
+        <!--?            #-->
+        <!--?            }-->
+        <!--?            {#-->
+        <!--?                "{% endfor %}" +-->
+        <!--?            #-->
+        <!--?            }-->
+        <!--?            {#-->
+        <!--?                "</div>"-->
+        <!--?            #-->
+        <!--?            }-->
+        <!--?            {#                )#-->
+        <!--?            }-->
+        <!--?            {#            </script>-->
+        <!--?            #}-->
+        <!--?            {##}-->
+        <!--?            {#-->
+        <!--?            <div class="checkbox-container">#}-->
+        <!--?                {# {% for field in form %}#}-->
+        <!--?                {# <label>#}-->
+        <!--?                    {# <input type="checkbox" id="checkbox-{{ field.auto_id }}" name="{{ field.name }}" #}-->
+        <!--?                              {# value="{{ field.value }}" onchange="toggleVisibility('{{ field.auto_id }}')">#}-->
+        <!--?                    {# {{ field.label }}#}-->
+        <!--?                    {# </label>#}-->
+        <!--?                {# {% endfor %}#}-->
+        <!--?                {#-->
+        <!--?            </div>-->
+        <!--?            #}-->
+        <!--?            {##}-->
+        <!--?            {# {% for field in form %}#}-->
+        <!--?            {#-->
+        <!--?            <div hidden="hidden" id="div-{{ field.auto_id }}" class="field-input">#}-->
+        <!--?                {# <label>#}-->
+        <!--?                    {# {{ field.label }}#}-->
+        <!--?                    {# </label>#}-->
+        <!--?                {# {{ field. }}#}-->
+        <!--?                {#-->
+        <!--?            </div>-->
+        <!--?            #}-->
+        <!--?            {# {% endfor %}#}-->
+        <!--?            {#-->
+        <!--?            <button type="submit" style="margin: 10px">Submit</button>-->
+        <!--?            #}-->
+        <!--?            {#-->
+        <!--?        </form>-->
+        <!--?        #}-->
 
-<!--?        {#-->
-<!--?        <form method="post" id="ExportForm" action="{% url 'export_fits' %}">#}-->
-<!--?            {# {% csrf_token %}#}-->
-<!--?            {# {{ form.errors }}#}-->
-<!--?            {##}-->
-<!--?            {#-->
-<!--?            <script>#-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                document.write(-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "<div class=\"checkbox-container\">" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "{% for field in form %}" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "<label>" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "<input type=\"checkbox\" id=\"checkbox-{{ field.auto_id }}\" name=\"{{ field.name }}\"" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "value=\"{{ field.value }}\" onchange=\"toggleVisibility('{{ field.auto_id }}')\">" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "{{ field.label }}" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "</label>" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "{% endfor %}" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "</div>"-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#                )#-->
-<!--?            }-->
-<!--?            {#            </script>-->
-<!--?            #}-->
-<!--?            {##}-->
-<!--?            {#-->
-<!--?            <div class="checkbox-container">#}-->
-<!--?                {# {% for field in form %}#}-->
-<!--?                {# <label>#}-->
-<!--?                    {# <input type="checkbox" id="checkbox-{{ field.auto_id }}" name="{{ field.name }}" #}-->
-<!--?                              {# value="{{ field.value }}" onchange="toggleVisibility('{{ field.auto_id }}')">#}-->
-<!--?                    {# {{ field.label }}#}-->
-<!--?                    {# </label>#}-->
-<!--?                {# {% endfor %}#}-->
-<!--?                {#-->
-<!--?            </div>-->
-<!--?            #}-->
-<!--?            {##}-->
-<!--?            {# {% for field in form %}#}-->
-<!--?            {#-->
-<!--?            <div hidden="hidden" id="div-{{ field.auto_id }}" class="field-input">#}-->
-<!--?                {# <label>#}-->
-<!--?                    {# {{ field.label }}#}-->
-<!--?                    {# </label>#}-->
-<!--?                {# {{ field. }}#}-->
-<!--?                {#-->
-<!--?            </div>-->
-<!--?            #}-->
-<!--?            {# {% endfor %}#}-->
-<!--?            {#-->
-<!--?            <button type="submit" style="margin: 10px">Submit</button>-->
-<!--?            #}-->
-<!--?            {#-->
-<!--?        </form>-->
-<!--?        #}-->
-
-        <div>
-            File Path
-        </div>
 
         <!-- SQL query export form -->
         <div>
-            <article class="content_part" style="margin: 0">
+            <article class="content_part">
                 <h2>SQL query export</h2>
                 <form id="sql_export_form">
                     {% csrf_token %}
@@ -170,116 +181,116 @@
                 </form>
 
 
-                <script>
-                    function triggerFileExplorer() {
-                        fetch('{% url "open_file_explorer" %}')
-                                .then(response => response.json())
-                                .then(data => {
-                                    document.getElementById('target_directory_path').value = data.directory_path;
-                                })
-                                .catch(error => console.error('Error:', error));
-                    }
-
-                    function closeModal(modalId) {
-                        var modal = document.getElementById(modalId);
-                        modal.style.display = 'none';
-                    }
-
-                </script>
             </article>
         </div>
     </div>
-</div>
 
-<!-- Export Pop-up window -->
-<div id="ExportModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('ExportModal')">&times;</span>
-        <div class="modal-body"></div>
-        <div class="button-container">
-            <button class="modalButtons" id="cancelBtn">Cancel</button>
-            <button class="modalButtons" id="confirmBtn">Confirm</button>
+    <script>
+        function triggerFileExplorer() {
+            fetch('{% url "open_file_explorer" %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('target_directory_path').value = data.directory_path;
+                    })
+                    .catch(error => console.error('Error:', error));
+        }
+
+        function closeModal(modalId) {
+            var modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+        }
+
+    </script>
+
+    <!-- Export Pop-up window -->
+    <div id="ExportModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('ExportModal')">&times;</span>
+            <div class="modal-body"></div>
+            <div class="button-container">
+                <button class="modalButtons" id="cancelBtn">Cancel</button>
+                <button class="modalButtons" id="confirmBtn">Confirm</button>
+            </div>
         </div>
     </div>
-</div>
 
 
-<!-- Wrong SQL query Pop-up window -->
-<div id="SQLqueryModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('SQLqueryModal')">&times;</span>
-        <p id="ErrorMessage"></p>
+    <!-- Wrong SQL query Pop-up window -->
+    <div id="SQLqueryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('SQLqueryModal')">&times;</span>
+            <p id="ErrorMessage"></p>
+        </div>
     </div>
-</div>
 
 
-<script>
+    <script>
 
-    document.getElementById('sql_export_form').onsubmit = function (event) {
-        event.preventDefault();
-        // send serialized data to the server
-        jQuery.ajax({
-            url: '{% url 'export_fits' %}', // URL to Django view that executes the SQL query
-            type: 'POST',
-            data: jQuery(this).serialize(),
-            success: function (response) {
-                if (response.error_message) {
-                    jQuery('#SQLqueryModal #ErrorMessage').text(response.error_message);
-                    document.getElementById('SQLqueryModal').style.display = 'block';
+        document.getElementById('sql_export_form').onsubmit = function (event) {
+            event.preventDefault();
+            // send serialized data to the server
+            jQuery.ajax({
+                url: '{% url 'export_fits' %}', // URL to Django view that executes the SQL query
+                type: 'POST',
+                data: jQuery(this).serialize(),
+                success: function (response) {
+                    if (response.error_message) {
+                        jQuery('#SQLqueryModal #ErrorMessage').text(response.error_message);
+                        document.getElementById('SQLqueryModal').style.display = 'block';
 
-                } else {
-                    console.log('AJAX success callback');
-                    jQuery('#ExportModal .modal-body').text(`Are you sure you want to export   ${response.source_paths.length}   FITS images into:  "${response.target_path}"?`);
-                    jQuery('#ExportModal').data('source_paths', response.source_paths);
-                    jQuery('#ExportModal').data('target_path', response.target_path);
-                    document.getElementById('ExportModal').style.display = 'block';
-                    console.log('Modal displayed');
+                    } else {
+                        console.log('AJAX success callback');
+                        jQuery('#ExportModal .modal-body').text(`Are you sure you want to export   ${response.source_paths.length}   FITS images into:  "${response.target_path}"?`);
+                        jQuery('#ExportModal').data('source_paths', response.source_paths);
+                        jQuery('#ExportModal').data('target_path', response.target_path);
+                        document.getElementById('ExportModal').style.display = 'block';
+                        console.log('Modal displayed');
+                    }
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('AJAX error callback');
+                    console.error('Error:', error);
+                    alert('An error occurred');
                 }
+            });
+        }
 
-            },
-            error: function (xhr, status, error) {
-                console.error('AJAX error callback');
-                console.error('Error:', error);
-                alert('An error occurred');
-            }
+        // bind to confirm button's click in the modal
+        jQuery('#confirmBtn').on('click', function () {
+            console.log('Confirm button clicked');
+            var sourcePaths = jQuery('#ExportModal').data('source_paths');
+            var targetPath = jQuery('#ExportModal').data('target_path');
+
+            jQuery.ajax({
+                url: '{% url 'copy_data' %}',
+                type: 'POST',
+                traditional: true,
+                data: {
+                    'csrfmiddlewaretoken': jQuery('input[name=csrfmiddlewaretoken]').val(),
+                    'source_paths': sourcePaths,
+                    'target_path': targetPath,
+                },
+                success: function (response) {
+                    console.log('Second AJAX success callback');
+                    console.log('Response received:', response);
+                    document.getElementById('ExportModal').style.display = 'none';
+                    alert(response.status);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Second AJAX error callback');
+                    console.error('Error:', error);
+                    alert(`An error occurred while exporting the files. Status: ${status}`);
+                }
+            });
         });
-    }
 
-    // bind to confirm button's click in the modal
-    jQuery('#confirmBtn').on('click', function () {
-        console.log('Confirm button clicked');
-        var sourcePaths = jQuery('#ExportModal').data('source_paths');
-        var targetPath = jQuery('#ExportModal').data('target_path');
-
-        jQuery.ajax({
-            url: '{% url 'copy_data' %}',
-            type: 'POST',
-            traditional: true,
-            data: {
-                'csrfmiddlewaretoken': jQuery('input[name=csrfmiddlewaretoken]').val(),
-                'source_paths': sourcePaths,
-                'target_path': targetPath,
-            },
-            success: function (response) {
-                console.log('Second AJAX success callback');
-                console.log('Response received:', response);
-                document.getElementById('ExportModal').style.display = 'none';
-                alert(response.status);
-            },
-            error: function (xhr, status, error) {
-                console.error('Second AJAX error callback');
-                console.error('Error:', error);
-                alert(`An error occurred while exporting the files. Status: ${status}`);
-            }
+        jQuery('#cancelBtn').on('click', function () {
+            console.log('Cancel button clicked');
+            document.getElementById('ExportModal').style.display = 'none';
         });
-    });
 
-    jQuery('#cancelBtn').on('click', function () {
-        console.log('Cancel button clicked');
-        document.getElementById('ExportModal').style.display = 'none';
-    });
-
-</script>
+    </script>
 </body>
 
 </html>
