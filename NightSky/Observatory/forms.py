@@ -193,14 +193,10 @@ class ExportForm(forms.Form):
     RANGE = MultipleFloatIntervalsField(required=False)
 
     object_name_choices = [
-        (image.ID, image.OBJECT_NAME)
+        (image.OBJECT_NAME, image.OBJECT_NAME)
         for image in FitsImage.objects.all().distinct("OBJECT_NAME").order_by("OBJECT_NAME")
     ]
 
     OBJECT_NAME = forms.MultipleChoiceField(
         choices=object_name_choices, widget=forms.CheckboxSelectMultiple, required=False
     )
-
-    # class Meta:
-    #     model = FitsImage
-    #     exclude = ["PATH"]

@@ -144,10 +144,6 @@ def export_fits(request):  # TODO: REMOVE PRINTS
             print(paths)
             print(len(paths), "\n--------")
 
-            # fits_image = form.save(commit=False)
-            # print(fits_image)
-            # print(len(FitsImage.objects.filter(form.data)))
-
             return redirect("export_fits")
 
     else:
