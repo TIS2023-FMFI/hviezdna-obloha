@@ -262,7 +262,7 @@ def copy_data_to_target(source_paths, target_path):
 
 def is_valid_sql_query(query):
     query = query.strip()
-    if re.search(r"\b(DELETE|DROP|TRUNCATE)\b", query):
+    if re.search(r"\b(DELETE|DROP|TRUNCATE|CREATE|ALTER|RENAME|INSERT|UPDATE|GRANT|REVOKE)\b", query):
         return False
 
     # if 'SELECT "*" FROM "Observatory_fitsimage"' in query:
@@ -308,15 +308,16 @@ def add_quotes(query):
         "PATH",
     ]
     query_words = query.split()
-    print(query_words)
 
     for i in range(len(query_words)):
         word = query_words[i].upper()
         if word in columns:
             query_words[i] = f'"{word.upper()}"'
+        if word[:-1] in columns:
+            query_words[i] = f'"{word[:-1].upper()}"'+word[-1]
     updated_query = " ".join(query_words)
 
     # Add quotes to table name if not already present
     updated_query = re.sub(r"FROM (\w+)", r'FROM "\1"', updated_query, flags=re.IGNORECASE)
-
     return updated_query
+
