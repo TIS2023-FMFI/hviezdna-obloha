@@ -34,13 +34,63 @@
     </nav>
 </div>
 
+
 <div class="contents">
+
     <div class="content_part">
         <h2>Export FITS Images</h2>
+    </div>
 
-        <form method="post">
-            {% csrf_token %}
+
+    <form method="post" id="export_form">
+        {% csrf_token %}
+
+        <div class="content_part">
+            <label>
+                <input type="checkbox" id="checkbox-is_sql" name="is_sql" onchange="toggleVisibility('is_sql')">
+                Manual SQL
+            </label>
+            <h3>Directory path:</h3>
+
+            <div class="input-group">
+                <label for="target_directory_path"></label>
+                <input type="text" id="target_directory_path" name="target_directory_path"
+                       placeholder="Enter directory path">
+                <button type="button" onclick="triggerFileExplorer()">Browse</button>
+            </div>
+        </div>
+
+
+        <!-- SQL query export form -->
+        <div class="content_part" id="div-is_sql" hidden="hidden">
+<!--?            <form id="sql_export_form">-->
+                {% csrf_token %}
+                <div class="sql_form-container">
+                    <h3>SQL query:</h3>
+
+                    <div class="input-group">
+                        <label for="sql_input"></label>
+                        <textarea id="sql_input" name="sql_input" rows="2" cols="120"
+                                  title='Enter your SQL query here. For example:&#10; SELECT "PATH" FROM "Observatory_fitsimage" WHERE "NAXIS" = 2'
+                        >SELECT "PATH" FROM "Observatory_fitsimage"
+                        </textarea>
+                        <input type="hidden" name="sql_export">
+<!--?                        <input type="submit" name="sql_query_export" value="Export">-->
+                    </div>
+                </div>
+<!--?            </form>-->
+
+
+        </div>
+        <div class="content_part">
             {{ form.as_div }}
+        </div>
+
+        <button type="submit" id="submit_export">EXPORT</button>
+
+    </form>
+</div>
+
 <!--?            {# <label for="{{ form.object.id_for_label }}">Object:</label><br>#}-->
 <!--?            {# <label>#}-->
 <!--?            {# <select name="{{ form.object.name }}" multiple>#}-->
@@ -54,9 +104,7 @@
 <!--?                {# </select>#}-->
 <!--?            {# </label>#}-->
 <!--?            {# <br>#}-->
-            <!-- Other fields here -->
-            <button type="submit">Submit</button>
-        </form>
+<!-- Other fields here -->
 
 <!--?        {#-->
 <!--?        <form method="post" id="ExportForm" action="{% url 'export_fits' %}">#}-->
@@ -142,55 +190,6 @@
 <!--?        </form>-->
 <!--?        #}-->
 
-        <div>
-            File Path
-        </div>
-
-        <!-- SQL query export form -->
-        <div>
-            <article class="content_part" style="margin: 0">
-                <h2>SQL query export</h2>
-                <form id="sql_export_form">
-                    {% csrf_token %}
-                    <div class="sql_form-container">
-                        <div class="input-group">
-                            <label for="target_directory_path">Directory path:</label>
-                            <input type="text" id="target_directory_path" name="target_directory_path"
-                                   placeholder="Enter directory path">
-                            <button type="button" onclick="triggerFileExplorer()">Browse</button>
-                        </div>
-                        <div class="input-group">
-                            <label for="sql_input">SQL query:</label>
-                            <textarea id="sql_input" name="sql_input" rows="2" cols="120"
-                                      title='Enter your SQL query here. For example:&#10; SELECT "PATH" FROM "Observatory_fitsimage" WHERE "NAXIS" = 2'
-                            >SELECT "PATH" FROM "Observatory_fitsimage" </textarea>
-                            <input type="hidden" name="sql_export">
-                            <input type="submit" name="sql_query_export" value="Export"></div>
-                    </div>
-                </form>
-
-
-                <script>
-                    function triggerFileExplorer() {
-                        fetch('{% url "open_file_explorer" %}')
-                                .then(response => response.json())
-                                .then(data => {
-                                    document.getElementById('target_directory_path').value = data.directory_path;
-                                })
-                                .catch(error => console.error('Error:', error));
-                    }
-
-                    function closeModal(modalId) {
-                        var modal = document.getElementById(modalId);
-                        modal.style.display = 'none';
-                    }
-
-                </script>
-            </article>
-        </div>
-    </div>
-</div>
-
 <!-- Export Pop-up window -->
 <div id="ExportModal" class="modal">
     <div class="modal-content">
@@ -212,10 +211,24 @@
     </div>
 </div>
 
+<script>
+    function triggerFileExplorer() {
+        fetch('{% url "open_file_explorer" %}')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('target_directory_path').value = data.directory_path;
+                })
+                .catch(error => console.error('Error:', error));
+    }
+
+    function closeModal(modalId) {
+        var modal = document.getElementById(modalId);
+        modal.style.display = 'none';
+    }
+</script>
 
 <script>
-
-    document.getElementById('sql_export_form').onsubmit = function (event) {
+    document.getElementById('export_form').onsubmit = function (event) {
         event.preventDefault();
         // send serialized data to the server
         jQuery.ajax({
@@ -278,8 +291,7 @@
         console.log('Cancel button clicked');
         document.getElementById('ExportModal').style.display = 'none';
     });
-
 </script>
-</body>
 
+</body>
 </html>
