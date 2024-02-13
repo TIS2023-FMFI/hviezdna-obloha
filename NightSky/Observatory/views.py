@@ -112,6 +112,7 @@ def process_and_log_directory(directory_path, request):
             del log
 
         del insert
+
     generate_sky_map()
     return inserted_rows
 
@@ -127,23 +128,29 @@ def export_fits(request):  # TODO: REMOVE PRINTS
     if request.method == "POST":
         form = ExportForm(request.POST)
 
+        target_path = request.POST.get("target_directory_path")
+        if target_path == "":
+            return JsonResponse({"error_message": "No target directory selected!"})
+
         # SQL query form processing
-        if "sql_export" in request.POST:
-            target_path = request.POST.get("target_directory_path")
-            if target_path == "":
-                return JsonResponse({"error_message": "No target directory selected!"})
+        if request.POST.get("is_sql"):
             sql_input = add_quotes(request.POST.get("sql_input"))
+
+            # TODO: check copying into inexisting folder
             try:
                 if is_valid_sql_query(sql_input):
                     results = execute_sql_query(sql_input)
-                    print([r[0] for r in results])
-                    return JsonResponse({"source_paths": [path[0] for path in results], "target_path": target_path})
+                    print(results)
+                    # print([r[0] for r in results])
+                    return JsonResponse({"source_paths": results, "target_path": target_path})
+
                 else:
                     return JsonResponse({"error_message": "Wrong SQL query"})
+
             except Exception as e:
                 return JsonResponse({"error_message": f"Error executing the SQL query: {e}"})
-        # end of SQL query form processing
 
+        # Export form processing
         elif form.is_valid():
             print(form.cleaned_data)
             queryset = FitsImage.objects.all()
@@ -172,13 +179,11 @@ def export_fits(request):  # TODO: REMOVE PRINTS
                     q_objects = Q(**{"%s__in" % field_name: field_input})
                     queryset = queryset.filter(q_objects)
 
-            paths = queryset.values_list("PATH", flat=True).order_by("PATH")
+            paths = queryset.values_list("PATH", flat=True)
 
-            print("---- PATHS ----")
-            print(paths)
-            print(len(paths), "\n--------")
+            return JsonResponse({"source_paths": list(paths), "target_path": target_path})
 
-            return redirect("export_fits")
+        return redirect("export_fits")
 
     else:
         form = ExportForm()
@@ -187,9 +192,11 @@ def export_fits(request):  # TODO: REMOVE PRINTS
 
 
 def execute_sql_query(sql_input):
-    with connection.cursor() as cursor:
-        cursor.execute(sql_input)
-        return cursor.fetchall()
+    raw_queryset = FitsImage.objects.raw(sql_input)
+    return list(fits.PATH for fits in raw_queryset)
+    # with connection.cursor() as cursor:
+    #     cursor.execute(sql_input)
+    #     return cursor.fetchall()
 
 
 def copy_data(request):
@@ -267,10 +274,10 @@ def is_valid_sql_query(query):
     if re.search(r"\b(DELETE|DROP|TRUNCATE)\b", query):
         return False
 
-    if 'SELECT "PATH" FROM "Observatory_fitsimage"' in query:
-        return True
+    # if 'SELECT "*" FROM "Observatory_fitsimage"' in query:
+    #     return True
 
-    return False
+    return True
 
 
 def add_quotes(query):
