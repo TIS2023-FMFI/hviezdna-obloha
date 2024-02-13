@@ -1,24 +1,35 @@
+import os
+import tkinter as tk
+from tkinter import filedialog
+from tkinter import messagebox
+from datetime import datetime, timedelta
 import json
+import shutil
+
 import django.db.utils
 from django.shortcuts import render, redirect
 from django.db import connection
 from django.http import JsonResponse
 from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.db.models import Q
+from django.forms import MultipleChoiceField
 
-from .forms import DirectoryForm, ExportForm
+from .forms import (
+    DirectoryForm,
+    ExportForm,
+    MultipleIntegerIntervalsField,
+    MultipleFloatIntervalsField,
+    MultipleStringsField,
+)
 from .models import FitsImage
 from .scripts.first_insert import process_folders_with_fits
 from .scripts.insert import Insert
 from .scripts.create_log import Log
+from .scripts.first_insert import process_folders_with_fits
 from .scripts.generate_sky_map import generate_sky_map
 
-import tkinter as tk
-from tkinter import filedialog
-from tkinter import messagebox
-import os
-from django.contrib import messages
-from datetime import datetime, timedelta
-import shutil
 
 from datetime import datetime, timedelta
 import re
@@ -52,7 +63,7 @@ def home(request):
 
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r"D:\TIS\20230503"
+    path = r"C:\UNI\TIS"
 
     # Get the last added directory path in the archive
     directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
@@ -105,10 +116,17 @@ def process_and_log_directory(directory_path, request):
     return inserted_rows
 
 
-def export_fits(request):
+def filter_fits_images(form_data):
+    ...
+    # Entry.objects.values_list("id", flat=True).order_by("id")
+
+
+def export_fits(request):  # TODO: REMOVE PRINTS
     results = None
+
     if request.method == "POST":
         form = ExportForm(request.POST)
+
         # SQL query form processing
         if "sql_export" in request.POST:
             target_path = request.POST.get("target_directory_path")
@@ -127,9 +145,44 @@ def export_fits(request):
         # end of SQL query form processing
 
         elif form.is_valid():
-            return render(request, "Observatory/export_fits.html", {"form": form, "results": results})
+            print(form.cleaned_data)
+            queryset = FitsImage.objects.all()
+
+            for field_name, field in form.fields.items():
+                field_input = form.cleaned_data.get(field_name)
+
+                if not field_input:
+                    continue
+
+                if isinstance(field, MultipleIntegerIntervalsField):
+                    exact_values, intervals = field_input
+                    q_objects = Q(**{"%s__in" % field_name: exact_values + intervals})
+                    queryset = queryset.filter(q_objects)
+
+                if isinstance(field, MultipleFloatIntervalsField):
+                    exact_values, intervals = field_input
+                    q_objects = Q(**{"%s__in" % field_name: exact_values})
+
+                    for left_endpoint, right_endpoint in intervals:
+                        q_objects |= Q(**{"%s__range" % field_name: (left_endpoint, right_endpoint)})
+
+                    queryset = queryset.filter(q_objects)
+
+                if isinstance(field, (MultipleStringsField, MultipleChoiceField)):
+                    q_objects = Q(**{"%s__in" % field_name: field_input})
+                    queryset = queryset.filter(q_objects)
+
+            paths = queryset.values_list("PATH", flat=True).order_by("PATH")
+
+            print("---- PATHS ----")
+            print(paths)
+            print(len(paths), "\n--------")
+
+            return redirect("export_fits")
+
     else:
         form = ExportForm()
+
     return render(request, "Observatory/export_fits.html", {"form": form, "results": results})
 
 
