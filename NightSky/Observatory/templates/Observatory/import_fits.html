@@ -17,20 +17,21 @@
         </nav>
     </header>
     <div class="contents">
-    
+
         <article class="content_part">
             <h2>Import Fits Images</h2>
         </article>
-    
+
         <article class="content_part">
             <form method="post" action="{% url 'import_fits' %}">
+
                 <h3>Last Night File Path:</h3>
                 <div class="form-container">
                     {% csrf_token %}
                     (path: "{{ last_added_directory_path }}")
                     <input type="submit" name="import_last_night" value="Import">
                 </div>
-            
+
                 {% if request.session.form_submitted == 'import_last_night' %}
                     {% for message in messages %}
                         <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% endif %}">
@@ -38,10 +39,10 @@
                         </div>
                     {% endfor %}
                 {% endif %}
-            
+
             </form>
         </article>
-    
+
         <article class="content_part" style="margin: 0">
             <form method="post" action="{% url 'import_fits' %}">
                 {% csrf_token %}
@@ -51,7 +52,7 @@
                     <button type="button" onclick="triggerFileExplorer()">Browse</button>
                     <input type="submit" name="import_directory" value="Import">
                 </div>
-            
+
                 {% if request.session.form_submitted == 'import_directory' %}
                     {% for message in messages %}
                         <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% endif %}">
@@ -59,10 +60,10 @@
                         </div>
                     {% endfor %}
                 {% endif %}
-            
+
             </form>
         </article>
-    
+
     </div>
 
     <script>

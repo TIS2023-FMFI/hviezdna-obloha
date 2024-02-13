@@ -1,13 +1,7 @@
-import os
-import tkinter as tk
-from tkinter import filedialog
-import shutil
-
 from django.db import connection
 from django.http import JsonResponse
 
 from django.shortcuts import render, redirect
-from django.contrib import messages
 from django.db.models import Q
 from django.forms import MultipleChoiceField
 
@@ -24,9 +18,16 @@ from .scripts.create_log import Log
 from .scripts.first_insert import process_folders_with_fits
 from .scripts.generate_sky_map import generate_sky_map
 
+import os
+from django.contrib import messages
+
+import tkinter as tk
+from tkinter import filedialog
 
 from datetime import datetime, timedelta
 import re
+
+import shutil
 
 
 # home.html functions
@@ -78,39 +79,66 @@ def last_ccd_temperature(request):
 # import_fits.html functions
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r"C:\UNI\TIS"
+    path = r"C:"
 
     # Get the last added directory path in the archive
-    directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
-    directories.sort(key=lambda x: os.path.getctime(os.path.join(path, x)), reverse=True)
-    last_added_directory_path = os.path.join(path, directories[0]) if directories else None
-    inserted_rows = 0
+    last_added_directory_path = get_last_added_directory_path(path, request)
 
     if request.method == "POST":
         if "import_last_night" in request.POST and last_added_directory_path:
             directory_path = last_added_directory_path
-            inserted_rows = process_and_log_directory(directory_path, request)
-            if inserted_rows > 0:
-                messages.success(request, f"Import successful")
-            else:
-                messages.error(request, f"Import failed.")
-            request.session["form_submitted"] = "import_last_night"
+            handle_import(directory_path, request, "import_last_night")
 
-        elif "import_directory" in request.POST:
-            if form.is_valid():
-                directory_path = form.cleaned_data["directory_path"]
-                inserted_rows = process_and_log_directory(directory_path, request)
-                if inserted_rows > 0:
-                    messages.success(request, f"Import successful")
-                else:
-                    messages.error(request, f"Import failed.")
-            else:
-                messages.error(request, "Incorrect input: Please ensure the directory path is correct.")
-            request.session["form_submitted"] = "import_directory"
+        elif "import_directory" in request.POST and form.is_valid():
+            directory_path = form.cleaned_data["directory_path"]
+            handle_import(directory_path, request, "import_directory")
+        else:
+            messages.error(request, "Incorrect input: Please ensure the directory path exists.")
 
     return render(
         request, "Observatory/import_fits.html", {"form": form, "last_added_directory_path": last_added_directory_path}
     )
+
+
+def get_last_added_directory_path(path, request):
+    try:
+        directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+        directories.sort(key=lambda x: os.path.getctime(os.path.join(path, x)), reverse=True)
+    except Exception as e:
+        messages.error(request, f"Failed to list directories: {str(e)}")
+        directories = []
+    request.session["form_submitted"] = "import_last_night"
+    return os.path.join(path, directories[0]) if directories else None
+
+
+def handle_import(directory_path, request, session_key):
+    inserted_rows = process_and_log_directory(directory_path, request)
+    if inserted_rows is not None:
+        messages.success(request, f"Successfully imported {inserted_rows} FITS images.")
+    request.session["form_submitted"] = session_key
+
+
+def process_and_log_directory(directory_path, request):
+    first_insert = False
+    try:
+        if first_insert:
+            inserted_rows = process_folders_with_fits(directory_path)
+        else:
+            insert = Insert(directory_path)
+            inserted_rows = insert.get_number_of_inserted_rows()
+
+            if inserted_rows != 0:
+                log = Log(insert.headers, directory_path)
+                log.generate_log()
+                del log
+
+            del insert
+        generate_sky_map()
+        return inserted_rows
+    except FileNotFoundError:
+        messages.error(request, "Import failed. Directory does not exist.")
+        return None
+
 
 def open_file_explorer(request):
     root = tk.Tk()
@@ -119,24 +147,6 @@ def open_file_explorer(request):
     directory_path = filedialog.askdirectory()
     root.destroy()
     return JsonResponse({"directory_path": directory_path})
-
-
-def process_and_log_directory(directory_path, request):
-    first_insert = False
-    if first_insert:
-        inserted_rows = process_folders_with_fits(directory_path)
-    else:
-        insert = Insert(directory_path)
-        inserted_rows = insert.get_number_of_inserted_rows()
-
-        if inserted_rows != 0:
-            log = Log(insert.headers, directory_path)
-            log.generate_log()
-            del log
-
-        del insert
-    generate_sky_map()
-    return inserted_rows
 
 
 def filter_fits_images(form_data):
