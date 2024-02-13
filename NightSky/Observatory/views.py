@@ -1,16 +1,11 @@
 import os
 import tkinter as tk
 from tkinter import filedialog
-from tkinter import messagebox
-from datetime import datetime, timedelta
-import json
 import shutil
 
-import django.db.utils
-from django.shortcuts import render, redirect
 from django.db import connection
 from django.http import JsonResponse
-from django.contrib import messages
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
@@ -24,7 +19,6 @@ from .forms import (
     MultipleStringsField,
 )
 from .models import FitsImage
-from .scripts.first_insert import process_folders_with_fits
 from .scripts.insert import Insert
 from .scripts.create_log import Log
 from .scripts.first_insert import process_folders_with_fits
@@ -35,32 +29,53 @@ from datetime import datetime, timedelta
 import re
 
 
-def open_file_explorer(request):
-    root = tk.Tk()
-    root.withdraw()
-    root.attributes("-topmost", True)  # bring the window to the top
-    directory_path = filedialog.askdirectory()
-    root.destroy()
-    return JsonResponse({"directory_path": directory_path})
-
-
+# home.html functions
 def home(request):
-    nights = number_of_nights(request)
-    frames = number_of_frames(request)
-    last_light_frame = last_light_frames_night(request)
-    calib_frames = last_calib_frames_night(request)
-    ccd_temp = last_ccd_temperature(request)
-
     context = {
-        "nights": nights,
-        "frames": frames,
-        "last_light_frame": last_light_frame,
-        "calib_frames": calib_frames,
-        "ccd_temp": ccd_temp,
+        "nights": number_of_nights(request),
+        "frames": number_of_frames(request),
+        "last_light_frame": last_light_frames_night(request),
+        "calib_frames": last_calib_frames_night(request),
+        "ccd_temp": last_ccd_temperature(request),
     }
     return render(request, "Observatory/home.html", context)
 
 
+def number_of_nights(request):
+    if FitsImage.objects.exists():
+        date_obs_values = FitsImage.objects.values_list("DATE_OBS", flat=True)
+
+        adjusted_dates = set()
+        for date_obs in date_obs_values:
+            if date_obs is not None:
+                date_time = datetime.strptime(date_obs, "%Y-%m-%dT%H:%M:%S.%f")
+
+                if date_time.time() < datetime.strptime("12:00:00", "%H:%M:%S").time():
+                    date_time -= timedelta(days=1)
+                adjusted_dates.add(date_time.date())
+        return len(adjusted_dates)
+    return None
+
+
+def number_of_frames(request):
+    return FitsImage.objects.count() if FitsImage.objects.exists() else None
+
+
+def last_light_frames_night(request):
+    return FitsImage.objects.filter(IMAGETYP="LIGHT").latest("DATE_OBS").DATE_OBS \
+        if FitsImage.objects.filter(IMAGETYP="LIGHT").exists() else None
+
+
+def last_calib_frames_night(request):
+    return FitsImage.objects.filter(IMAGETYP="CALIB").latest("DATE_OBS").DATE_OBS \
+        if FitsImage.objects.filter(IMAGETYP="CALIB").exists() else None
+
+
+def last_ccd_temperature(request):
+    return FitsImage.objects.latest("DATE_OBS").CCD_TEMP if FitsImage.objects.exists() else None
+
+
+# import_fits.html functions
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
     path = r"C:\UNI\TIS"
@@ -96,6 +111,14 @@ def import_fits(request):
     return render(
         request, "Observatory/import_fits.html", {"form": form, "last_added_directory_path": last_added_directory_path}
     )
+
+def open_file_explorer(request):
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes("-topmost", True)  # bring the window to the top
+    directory_path = filedialog.askdirectory()
+    root.destroy()
+    return JsonResponse({"directory_path": directory_path})
 
 
 def process_and_log_directory(directory_path, request):
@@ -215,51 +238,6 @@ def copy_data_to_target(source_paths, target_path):
         except Exception as e:
             return f"Error copying file: {e}"
     return f"Copied successfully to {target_path}"
-
-
-def number_of_nights(request):
-    if FitsImage.objects.exists():
-        date_obs_values = FitsImage.objects.values_list("DATE_OBS", flat=True)
-
-        adjusted_dates = set()
-        for date_obs in date_obs_values:
-            date_time = datetime.strptime(date_obs, "%Y-%m-%dT%H:%M:%S.%f")
-
-            if date_time.time() < datetime.strptime("12:00:00", "%H:%M:%S").time():
-                date_time -= timedelta(days=1)
-            adjusted_dates.add(date_time.date())
-
-        return len(adjusted_dates)
-    return None
-
-
-def number_of_frames(request):
-    if FitsImage.objects.exists():
-        frames = FitsImage.objects.count()
-        return frames
-    return None
-
-
-def last_light_frames_night(request):
-    if FitsImage.objects.filter(IMAGETYP="LIGHT").exists():
-        light_frames = FitsImage.objects.filter(IMAGETYP="LIGHT").latest("DATE_OBS").DATE_OBS
-        return light_frames
-    return None
-
-
-def last_calib_frames_night(request):
-    if FitsImage.objects.filter(IMAGETYP="CALIB").exists():
-        calib_frames = FitsImage.objects.filter(IMAGETYP="CALIB").latest("DATE_OBS").DATE_OBS
-        return calib_frames
-    return None
-
-
-def last_ccd_temperature(request):
-    if FitsImage.objects.exists():
-        last_fits_image = FitsImage.objects.latest("DATE_OBS")
-        ccd_temp = last_fits_image.CCD_TEMP
-        return ccd_temp
-    return None
 
 
 def is_valid_sql_query(query):
