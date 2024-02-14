@@ -24,6 +24,7 @@ from .forms import (
     MultipleStringsField,
 )
 from .models import FitsImage
+from .scripts.csv_writer import CsvWriter
 from .scripts.first_insert import process_folders_with_fits
 from .scripts.insert import Insert
 from .scripts.create_log import Log
@@ -159,7 +160,7 @@ def filter_fits_images(form_data):
 
 
 def export_fits(request):  # TODO: REMOVE PRINTS
-    results = None
+    paths = None
 
     if request.method == "POST":
         form = ExportForm(request.POST)
@@ -175,8 +176,15 @@ def export_fits(request):  # TODO: REMOVE PRINTS
             # TODO: check copying into inexisting folder
             try:
                 if is_valid_sql_query(sql_input):
-                    results = execute_sql_query(sql_input)
-                    return JsonResponse({"source_paths": results, "target_path": target_path})
+                    raw_queryset = execute_sql_query(sql_input)
+                    ids = [item.pk for item in raw_queryset]
+                    queryset = FitsImage.objects.filter(pk__in=ids)
+
+                    csv_writer = CsvWriter(queryset)
+                    csv_writer.write(target_path)
+
+                    paths = list(fits.PATH for fits in raw_queryset)
+                    return JsonResponse({"source_paths": paths, "target_path": target_path})
 
                 else:
                     return JsonResponse({"error_message": "Wrong SQL query"})
@@ -209,6 +217,8 @@ def export_fits(request):  # TODO: REMOVE PRINTS
                     queryset = queryset.filter(q_objects)
 
             paths = queryset.values_list("PATH", flat=True)
+            csv_writer = CsvWriter(queryset)
+            csv_writer.write(target_path)
 
             return JsonResponse({"source_paths": list(paths), "target_path": target_path})
 
@@ -217,27 +227,32 @@ def export_fits(request):  # TODO: REMOVE PRINTS
     else:
         form = ExportForm()
 
-    return render(request, "Observatory/export_fits.html", {"form": form, "results": results})
+    return render(request, "Observatory/export_fits.html", {"form": form, "results": paths})
 
 
 def execute_sql_query(sql_input):
     raw_queryset = FitsImage.objects.raw(sql_input)
-    return list(fits.PATH for fits in raw_queryset)
+    return raw_queryset
     # with connection.cursor() as cursor:
     #     cursor.execute(sql_input)
     #     return cursor.fetchall()
 
 
 def copy_data(request):
+    status = None
+
     if request.method == "POST":
         source_paths = request.POST.getlist("source_paths")
         target_path = request.POST.get("target_path")
-        print("Source Paths:", source_paths)
-        print("Destination Path:", target_path)
+
+        # print("Source Paths:", source_paths)
+        # print("Destination Path:", target_path)
+
         if os.path.exists(target_path):
             status = copy_data_to_target(source_paths, target_path)
         else:
             status = "Target directory doesn't exist."
+
     return JsonResponse({"status": status})
 
 

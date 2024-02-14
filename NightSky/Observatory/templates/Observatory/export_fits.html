@@ -244,6 +244,7 @@
                     jQuery('#ExportModal .modal-body').text(`Are you sure you want to export   ${response.source_paths.length}   FITS images into:  "${response.target_path}"?`);
                     jQuery('#ExportModal').data('source_paths', response.source_paths);
                     jQuery('#ExportModal').data('target_path', response.target_path);
+
                     document.getElementById('ExportModal').style.display = 'block';
                     console.log('Modal displayed');
                 }
@@ -260,8 +261,8 @@
     // bind to confirm button's click in the modal
     jQuery('#confirmBtn').on('click', function () {
         console.log('Confirm button clicked');
-        var sourcePaths = jQuery('#ExportModal').data('source_paths');
-        var targetPath = jQuery('#ExportModal').data('target_path');
+        const sourcePaths = jQuery('#ExportModal').data('source_paths');
+        const targetPath = jQuery('#ExportModal').data('target_path');
 
         jQuery.ajax({
             url: '{% url 'copy_data' %}',
@@ -270,7 +271,7 @@
             data: {
                 'csrfmiddlewaretoken': jQuery('input[name=csrfmiddlewaretoken]').val(),
                 'source_paths': sourcePaths,
-                'target_path': targetPath,
+                'target_path': targetPath
             },
             success: function (response) {
                 console.log('Second AJAX success callback');
