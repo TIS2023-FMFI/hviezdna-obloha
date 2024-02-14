@@ -83,7 +83,7 @@ def last_ccd_temperature(request):
 # import_fits.html functions
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r"C:"
+    path = r"C:\UNI\TIS"
 
     # Get the last added directory path in the archive
     last_added_directory_path = get_last_added_directory_path(path, request)
@@ -176,8 +176,6 @@ def export_fits(request):  # TODO: REMOVE PRINTS
             try:
                 if is_valid_sql_query(sql_input):
                     results = execute_sql_query(sql_input)
-                    print(results)
-                    # print([r[0] for r in results])
                     return JsonResponse({"source_paths": results, "target_path": target_path})
 
                 else:
@@ -197,12 +195,7 @@ def export_fits(request):  # TODO: REMOVE PRINTS
                 if not field_input:
                     continue
 
-                if isinstance(field, MultipleIntegerIntervalsField):
-                    exact_values, intervals = field_input
-                    q_objects = Q(**{"%s__in" % field_name: exact_values + intervals})
-                    queryset = queryset.filter(q_objects)
-
-                if isinstance(field, MultipleFloatIntervalsField):
+                if isinstance(field, (MultipleIntegerIntervalsField, MultipleFloatIntervalsField)):
                     exact_values, intervals = field_input
                     q_objects = Q(**{"%s__in" % field_name: exact_values})
 
