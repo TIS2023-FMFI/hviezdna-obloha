@@ -216,8 +216,9 @@ def export_fits(request):  # TODO: REMOVE PRINTS
             paths = queryset.values_list("PATH", flat=True)
             csv_writer = CsvWriter(queryset)
             csv_writer.write(target_path)
+            ids = [item.pk for item in queryset]
 
-            return JsonResponse({"source_paths": list(paths), "target_path": target_path})
+            return JsonResponse({"ids": ids, "source_paths": list(paths), "target_path": target_path})
 
         return redirect("export_fits")
 
