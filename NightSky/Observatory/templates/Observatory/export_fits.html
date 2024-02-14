@@ -46,10 +46,6 @@
         {% csrf_token %}
 
         <div class="content_part">
-            <label>
-                <input type="checkbox" id="checkbox-is_sql" name="is_sql" onchange="toggleVisibility('is_sql')">
-                Manual SQL
-            </label>
             <h3>Directory path:</h3>
 
             <div class="input-group">
@@ -60,10 +56,17 @@
             </div>
         </div>
 
+        <div class="content_part">
+            <div>
+                <label>
+                    <input type="checkbox" id="checkbox-is_sql" name="is_sql" onchange="toggleVisibility('is_sql')">
+                    Manual SQL
+                </label>
+            </div>
 
-        <!-- SQL query export form -->
-        <div class="content_part" id="div-is_sql" hidden="hidden">
-<!--?            <form id="sql_export_form">-->
+            <!-- SQL query export form -->
+            <div id="div-is_sql" hidden="hidden">
+                <!--?            <form id="sql_export_form">-->
                 {% csrf_token %}
                 <div class="sql_form-container">
                     <h3>SQL query:</h3>
@@ -75,13 +78,15 @@
                         >SELECT "PATH" FROM "Observatory_fitsimage"
                         </textarea>
                         <input type="hidden" name="sql_export">
-<!--?                        <input type="submit" name="sql_query_export" value="Export">-->
+                        <!--?                        <input type="submit" name="sql_query_export" value="Export">-->
                     </div>
                 </div>
-<!--?            </form>-->
+                <!--?            </form>-->
 
 
+            </div>
         </div>
+
         <div class="content_part">
             {{ form.as_div }}
         </div>
