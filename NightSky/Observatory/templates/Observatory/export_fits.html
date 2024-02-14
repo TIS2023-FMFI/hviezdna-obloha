@@ -47,8 +47,7 @@
 
         <div class="content_part">
             <h3>Directory path:</h3>
-
-            <div class="input-group">
+            <div class="form-container">
                 <label for="target_directory_path"></label>
                 <input type="text" id="target_directory_path" name="target_directory_path"
                        placeholder="Enter directory path">
@@ -57,7 +56,7 @@
         </div>
 
         <div class="content_part">
-            <div>
+            <div id="manualSQL-checkbox-div">
                 <label>
                     <input type="checkbox" id="checkbox-is_sql" name="is_sql" onchange="toggleVisibility('is_sql')">
                     Manual SQL
@@ -67,15 +66,14 @@
             <!-- SQL query export form -->
             <div id="div-is_sql" hidden="hidden">
                 {% csrf_token %}
-                <div class="sql_form-container">
-                    <h3>SQL query:</h3>
-
-                        <label for="sql_input"></label>
-                        <textarea id="sql_input" name="sql_input" rows="2" cols="120"
-                                  title='Enter your SQL query here. For example:&#10; SELECT "PATH" FROM "Observatory_fitsimage" WHERE "NAXIS" = 2'
-                        >SELECT ID, PATH FROM Observatory_fitsimage
-                        </textarea>
-                        <input type="hidden" name="sql_export">
+                <h3>SQL query:</h3>
+                <div class="form-container">
+                    <label for="sql_input"></label>
+                    <textarea id="sql_input" name="sql_input" rows="2" cols="120"
+                              title='Enter your SQL query here. For example:&#10; SELECT "PATH" FROM "Observatory_fitsimage" WHERE "NAXIS" = 2'
+                    >SELECT ID, PATH FROM Observatory_fitsimage
+                    </textarea>
+                    <input type="hidden" name="sql_export">
                 </div>
             </div>
 
@@ -192,11 +190,10 @@
 <!-- Export Pop-up window -->
 <div id="ExportModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeModal('ExportModal')">&times;</span>
         <div class="modal-body"></div>
         <div class="button-container">
-            <button class="modalButtons" id="cancelBtn">Cancel</button>
             <button class="modalButtons" id="confirmBtn">Confirm</button>
+            <button class="modalButtons" id="cancelBtn">Cancel</button>
         </div>
     </div>
 </div>
