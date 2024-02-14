@@ -17,11 +17,15 @@
     function toggleVisibility(id) {
         const checkbox = document.getElementById("checkbox-" + id);
         const fieldDiv = document.getElementById("div-" + id);
+        const formDiv = document.getElementById("export_model_form");
 
         if (checkbox.checked) {
             fieldDiv.removeAttribute("hidden");
+            formDiv.setAttribute("hidden", "hidden");
+
         } else {
             fieldDiv.setAttribute("hidden", "hidden");
+            formDiv.removeAttribute("hidden");
         }
     }
 </script>
@@ -82,7 +86,7 @@
 
         </div>
 
-        <div class="content_part">
+        <div class="content_part" id="export_model_form">
             {{ form.as_div }}
         </div>
 
