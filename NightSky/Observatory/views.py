@@ -160,37 +160,34 @@ def filter_fits_images(form_data):
 
 
 def export_fits(request):  # TODO: REMOVE PRINTS
-    paths = None
-
     if request.method == "POST":
-        form = ExportForm(request.POST)
 
+        form = ExportForm(request.POST)
         target_path = request.POST.get("target_directory_path")
-        if target_path == "":
-            return JsonResponse({"error_message": "No target directory selected!"})
+
+        if not target_path:
+            return JsonResponse({"error_message": "Directory Error: No target directory selected!"})
 
         # SQL query form processing
         if request.POST.get("is_sql"):
             sql_input = add_quotes(request.POST.get("sql_input"))
 
-            # TODO: check copying into inexisting folder
-            try:
-                if is_valid_sql_query(sql_input):
+            if sql_input:
+                try:
                     raw_queryset = execute_sql_query(sql_input)
+                    paths = [fits.PATH for fits in raw_queryset]
                     ids = [item.pk for item in raw_queryset]
-                    queryset = FitsImage.objects.filter(pk__in=ids)
 
-                    csv_writer = CsvWriter(queryset)
-                    csv_writer.write(target_path)
+                    return JsonResponse({
+                        "ids": ids,
+                        "source_paths": paths,
+                        "target_path": target_path
+                    })
 
-                    paths = list(fits.PATH for fits in raw_queryset)
-                    return JsonResponse({"source_paths": paths, "target_path": target_path})
-
-                else:
-                    return JsonResponse({"error_message": "Wrong SQL query"})
-
-            except Exception as e:
-                return JsonResponse({"error_message": f"Error executing the SQL query: {e}"})
+                except Exception as e:
+                    return JsonResponse({"error_message": f"SQL Error: {str(e)}"})
+            else:
+                return JsonResponse({"error_message": "SQL Error: SQL input is empty."})
 
         # Export form processing
         elif form.is_valid():
@@ -227,33 +224,37 @@ def export_fits(request):  # TODO: REMOVE PRINTS
     else:
         form = ExportForm()
 
-    return render(request, "Observatory/export_fits.html", {"form": form, "results": paths})
+    return render(request, "Observatory/export_fits.html", {"form": form})
 
 
 def execute_sql_query(sql_input):
-    raw_queryset = FitsImage.objects.raw(sql_input)
-    return raw_queryset
+    return FitsImage.objects.raw(sql_input)
     # with connection.cursor() as cursor:
     #     cursor.execute(sql_input)
     #     return cursor.fetchall()
 
 
 def copy_data(request):
-    status = None
-
     if request.method == "POST":
+        ids = request.POST.getlist("ids")
         source_paths = request.POST.getlist("source_paths")
         target_path = request.POST.get("target_path")
 
-        # print("Source Paths:", source_paths)
-        # print("Destination Path:", target_path)
+        # Ensure target path exists
+        if not os.path.exists(target_path):
+            return JsonResponse({"error_message": "Directory Error: Target directory doesn't exist."})
 
-        if os.path.exists(target_path):
-            status = copy_data_to_target(source_paths, target_path)
-        else:
-            status = "Target directory doesn't exist."
+        queryset = FitsImage.objects.filter(pk__in=ids)
+        status = copy_data_to_target(source_paths, target_path)
 
-    return JsonResponse({"status": status})
+        # Check if copy operation was successful before writing CSV
+        if status.startswith("Copied successfully"):
+            csv_writer = CsvWriter(queryset)
+            csv_writer.write(target_path)
+
+        return JsonResponse({"status": status})
+
+    return JsonResponse({"error_message": "Invalid request method."})
 
 
 def copy_data_to_target(source_paths, target_path):
