@@ -70,6 +70,7 @@ a:hover {
 }
 
 .form-container {
+    display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 5px;
@@ -97,18 +98,17 @@ input[type="submit" i], button {
     font-size: 18px;
 }
 
-#directory_path {
-    flex-grow: 1;
-    border: none;
-    border-radius: 5px;
-    height: 42px;
-    padding: 0 10px;
-    font-size: 18px;
-}
-
 #ExportForm {
     padding: 20px;
     border-radius: 20px;
+}
+
+#checkbox-is_sql {
+    margin: 0;
+}
+
+#manualSQL-checkbox-div {
+    margin: 10px 0;
 }
 
 #sql_input {
@@ -152,7 +152,6 @@ th, td {
     border: 1px solid #ddd;
 }
 
-
 .alert-success {
     color: #c3e6cb;
 }
@@ -176,8 +175,9 @@ th, td {
     border: none;
     border-radius: 5px;
     font-size: 18px;
-    resize: both;
-    width: calc(100% - 20px);
+    resize: vertical;
+    min-height: 19px;
+    width: 100%;
 }
 
 .modal {
@@ -206,20 +206,6 @@ th, td {
     margin: 5% auto;
 }
 
-.close {
-    color: #888;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: white;
-    text-decoration: none;
-    cursor: pointer;
-}
-
 .modalButtons {
     margin: 0 10px;
     padding: 10px 20px;
@@ -231,8 +217,7 @@ th, td {
     border-radius: 5px;
 }
 
-.modalButtons:hover,
-.modalButtons:focus {
+.modalButtons:hover, .modalButtons:focus {
     color: white;
     text-decoration: none;
     cursor: pointer;
@@ -245,22 +230,5 @@ th, td {
     justify-content: center;
     align-items: center;
     margin: 20px;
-}
-
-.input-group {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 5px;
-    gap: 10px;
-    margin: 10px 0;
-    width: 100%;
-}
-
-.sql_form-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 10px;
 }
 
