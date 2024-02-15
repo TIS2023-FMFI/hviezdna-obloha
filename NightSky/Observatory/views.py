@@ -1,20 +1,15 @@
-import os
-import tkinter as tk
-from tkinter import filedialog
-from tkinter import messagebox
-from datetime import datetime, timedelta
-import json
-import shutil
-
-import django.db.utils
-from django.shortcuts import render, redirect
-from django.db import connection
 from django.http import JsonResponse
-from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
 from django.forms import MultipleChoiceField
+
+import tkinter as tk
+from tkinter import filedialog
+
+import os
+import shutil
+from typing import List, Union
 
 from .forms import (
     DirectoryForm,
@@ -25,7 +20,6 @@ from .forms import (
 )
 from .models import FitsImage
 from .scripts.csv_writer import CsvWriter
-from .scripts.first_insert import process_folders_with_fits
 from .scripts.insert import Insert
 from .scripts.create_log import Log
 from .scripts.first_insert import process_folders_with_fits
@@ -84,7 +78,7 @@ def last_ccd_temperature(request):
 # import_fits.html functions
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r"C:\UNI\TIS"
+    path = r"C:/"
 
     # Get the last added directory path in the archive
     last_added_directory_path = get_last_added_directory_path(path, request)
@@ -258,11 +252,16 @@ def copy_data(request):
     return JsonResponse({"error_message": "Invalid request method."})
 
 
-def copy_data_to_target(source_paths, target_path):
+def copy_data_to_target(source_paths: Union[List[str], List[os.PathLike]], target_path: Union[str, os.PathLike]) -> str:
     for source in source_paths:
         try:
             if os.path.exists(source):
-                shutil.copy2(source, target_path)
+                source_dir, source_filename = os.path.split(source)
+                filename_without_ext, file_extension = source_filename.rsplit('.', 1)
+                target_filename = f"{filename_without_ext}_{file_extension}.fit"
+                full_target_path = os.path.join(target_path, target_filename)
+
+                shutil.copy2(str(source), str(full_target_path))
             else:
                 return f"Source file {source} does not exist."
         except Exception as e:
