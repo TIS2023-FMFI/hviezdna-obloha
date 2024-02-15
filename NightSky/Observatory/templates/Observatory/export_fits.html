@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Charon's Little Helper - Import Fits</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="{% static 'jquery-3.7.1.js' %}"></script>
 </head>
 
 <body>
@@ -55,7 +55,8 @@
                 <label for="target_directory_path"></label>
                 <input type="text" id="target_directory_path" name="target_directory_path"
                        placeholder="Enter directory path">
-                <button type="button" onclick="triggerFileExplorer()">Browse</button><br>
+                <button type="button" onclick="triggerFileExplorer()">Browse</button>
+                <br>
             </div>
             <div id="target_directory_path_error" class="alert-danger"></div>
         </div>
@@ -75,9 +76,42 @@
                 <div class="form-container">
                     <label for="sql_input"></label>
                     <textarea id="sql_input" name="sql_input" rows="2" cols="120"
-                              title='Enter your SQL query here. For example:&#10; SELECT "PATH" FROM "Observatory_fitsimage" WHERE "NAXIS" = 2'
-                    >SELECT ID, PATH FROM Observatory_fitsimage
-                    </textarea>
+                              title='columns names:
+ID,
+NAXIS,
+NAXIS1,
+NAXIS2,
+IMAGETYP,
+FILTER,
+OBJECT_NAME,
+SERIES,
+NOTES,
+DATE_OBS,
+MJD_OBS,
+EXPTIME,
+CCD_TEMP,
+XBINNING,
+YBINNING,
+XORGSUBF,
+YORGSUBF,
+MODE,
+GAIN,
+RD_NOISE,
+OBSERVER,
+RA,
+DEC,
+RA_PNT,
+DEC_PNT,
+AZIMUTH,
+ELEVATIO,
+AIRMASS,
+RATRACK,
+DECTRACK,
+PHASE,
+RANGE,
+PATH
+                    '
+                    >SELECT * FROM Observatory_fitsimage </textarea>
                     <input type="hidden" name="sql_export">
                 </div>
                 <div id="sql_input_error" class="alert-danger"></div>
@@ -247,7 +281,7 @@
                 $sqlInputError.empty();
                 $targetDirectoryPathError.empty();
                 jQuery('#sql_input_success').empty();
-                
+
                 if (response.error_message) {
                     if (response.error_message.includes("SQL")) {
                         // If the error message is related to SQL, show it under the SQL input
@@ -258,11 +292,11 @@
                     }
                 } else {
                     console.log('AJAX success callback');
-                    
+
                     const $exportModal = jQuery('#ExportModal');
-                    
+
                     jQuery('#ExportModal .modal-body').html(`Do you want to export ${response.source_paths.length} FITS images into:<br>"${response.target_path}"?`);
-                    
+
                     $exportModal.data('ids', response.ids);
                     $exportModal.data('source_paths', response.source_paths);
                     $exportModal.data('target_path', response.target_path);
@@ -276,7 +310,7 @@
                 // Clear previous error messages first
                 jQuery('#sql_input_error').empty();
                 jQuery('#target_directory_path_error').empty();
-                
+
                 console.error('AJAX error callback');
                 console.error('Error:', error);
                 alert('An error occurred');
@@ -287,9 +321,9 @@
     // bind to confirm button's click in the modal
     jQuery('#confirmBtn').on('click', function () {
         console.log('Confirm button clicked');
-        
+
         const $exportModal = jQuery('#ExportModal');
-        
+
         const ids = $exportModal.data('ids');
         const sourcePaths = $exportModal.data('source_paths');
         const targetPath = $exportModal.data('target_path');
@@ -308,21 +342,21 @@
                 const $targetDirectoryPathError = jQuery('#target_directory_path_error');
                 const $sqlInputError = jQuery('#sql_input_error');
                 const $sqlInputSuccess = jQuery('#sql_input_success');
-                
+
                 $targetDirectoryPathError.empty();
                 $sqlInputError.empty()
                 $sqlInputSuccess.empty();
-                
+
                 if (response.error_message.includes("directory")) {
                     // If the error message is related to directory path, show it under the directory path input
                     $targetDirectoryPathError.text(response.error_message).show();
-                } else if (response.status.includes("Copied successfully")){
+                } else if (response.status.includes("Copied successfully")) {
                     console.log('Second AJAX success callback');
                     console.log('Response received:', response);
                     document.getElementById('ExportModal').style.display = 'none';
                     $sqlInputSuccess.text(response.status).show();
                 } else {
-                    if (response.error_message){
+                    if (response.error_message) {
                         $sqlInputError.text(response.error_message).show();
                     } else {
                         $sqlInputError.text(response.status).show();
