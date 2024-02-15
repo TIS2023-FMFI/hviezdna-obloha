@@ -278,10 +278,6 @@ def is_valid_sql_query(query):
     query = query.strip()
     if re.search(r"\b(DELETE|DROP|TRUNCATE|CREATE|ALTER|RENAME|INSERT|UPDATE|GRANT|REVOKE)\b", query):
         return False
-
-    # if 'SELECT "*" FROM "Observatory_fitsimage"' in query:
-    #     return True
-
     return True
 
 
@@ -322,16 +318,31 @@ def add_quotes(query):
         "PATH",
     ]
     query_words = query.split()
-
     for i in range(len(query_words)):
         word = query_words[i].upper()
-        if word in columns:
-            query_words[i] = f'"{word.upper()}"'
-        if word[:-1] in columns:
-            query_words[i] = f'"{word[:-1].upper()}"'+word[-1]
+        if word in columns:  # if the column name does not contain quotes and contains a space before the operator
+            query_words[i] = f'"{word}"'
+        elif word[1:-1] in columns:  # if the column name contains quotes and a space before the operator
+            query_words[i] = f'"{word[1:-1]}"'
+        elif len(word) > 1 and any(op in word for op in [">=", "<=", "<", ">", "=", ","]):
+            operator = get_comparison_operator(word)
+            position = word.find(operator)
+            if word[:position] in columns:  # if the column name does not contain quotes and a space before the operator
+                query_words[i] = f'"{word[:position]}"' + word[position:]
+            if word[
+               1:position - 1] in columns:  # if the column name contains quotes and does not contain a space before the operator
+                query_words[i] = f'"{word[1:position - 1]}"' + word[position:]
+
     updated_query = " ".join(query_words)
 
     # Add quotes to table name if not already present
     updated_query = re.sub(r"FROM (\w+)", r'FROM "\1"', updated_query, flags=re.IGNORECASE)
     return updated_query
 
+
+def get_comparison_operator(word):
+    comparison_operators = [">=", "<=", "<", ">", "=", ","]
+    for op in comparison_operators:
+        if op in word:
+            return op
+    return None
