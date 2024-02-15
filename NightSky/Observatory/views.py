@@ -85,7 +85,6 @@ def last_ccd_temperature(request):
 # import_fits.html functions
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r"C:\UNI\TIS"
 
     # TODO: encapsulate config parser
     config = ConfigParser()
