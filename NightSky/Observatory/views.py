@@ -5,7 +5,6 @@ from tkinter import messagebox
 from datetime import datetime, timedelta
 import json
 import shutil
-from configparser import ConfigParser
 
 import django.db.utils
 from django.shortcuts import render, redirect
@@ -31,6 +30,7 @@ from .scripts.insert import Insert
 from .scripts.create_log import Log
 from .scripts.first_insert import process_folders_with_fits
 from .scripts.generate_sky_map import generate_sky_map
+from .scripts.config import Config
 
 from datetime import datetime, timedelta
 import re
@@ -87,9 +87,8 @@ def import_fits(request):
     form = DirectoryForm(request.POST or None)
 
     # TODO: encapsulate config parser
-    config = ConfigParser()
-    config.read('static/config.ini')
-    path = config['Paths']['fits_archive']
+
+    path = Config.get_property('Paths', 'fits_archive')
 
     # Get the last added directory path in the archive
     last_added_directory_path = get_last_added_directory_path(path, request)
