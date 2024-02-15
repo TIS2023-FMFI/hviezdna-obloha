@@ -5,6 +5,7 @@ from tkinter import messagebox
 from datetime import datetime, timedelta
 import json
 import shutil
+from configparser import ConfigParser
 
 import django.db.utils
 from django.shortcuts import render, redirect
@@ -84,7 +85,11 @@ def last_ccd_temperature(request):
 # import_fits.html functions
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
-    path = r"C:\UNI\TIS"
+
+    # TODO: encapsulate config parser
+    config = ConfigParser()
+    config.read('static/config.ini')
+    path = config['Paths']['fits_archive']
 
     # Get the last added directory path in the archive
     last_added_directory_path = get_last_added_directory_path(path, request)

@@ -3,6 +3,5 @@ node_modules/
 .env
 db.*
 /uploads/
-NightSky/.idea/
-.idea/
+**/.idea/
 Observatory/migrations/
