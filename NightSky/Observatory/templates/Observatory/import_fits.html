@@ -1,7 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,7 +8,6 @@
     <title>Charon's Little Helper - Import Fits</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
 </head>
-
 <body>
     <header class="title_a_navbar">
         <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
@@ -19,19 +17,32 @@
         </nav>
     </header>
     <div class="contents">
+
         <article class="content_part">
             <h2>Import Fits Images</h2>
         </article>
+
         <article class="content_part">
             <form method="post" action="{% url 'import_fits' %}">
+
                 <h3>Last Night File Path:</h3>
                 <div class="form-container">
                     {% csrf_token %}
                     (path: "{{ last_added_directory_path }}")
                     <input type="submit" name="import_last_night" value="Import">
                 </div>
+
+                {% if request.session.form_submitted == 'import_last_night' %}
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
             </form>
         </article>
+
         <article class="content_part" style="margin: 0">
             <form method="post" action="{% url 'import_fits' %}">
                 {% csrf_token %}
@@ -41,19 +52,29 @@
                     <button type="button" onclick="triggerFileExplorer()">Browse</button>
                     <input type="submit" name="import_directory" value="Import">
                 </div>
-            </form>
 
-            <script>
-            function triggerFileExplorer() {
-                fetch('{% url "open_file_explorer" %}')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('directory_path').value = data.directory_path;
-                })
-                .catch(error => console.error('Error:', error));
-            }
-            </script>
+                {% if request.session.form_submitted == 'import_directory' %}
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+            </form>
         </article>
+
     </div>
+
+    <script>
+        function triggerFileExplorer() {
+            fetch('{% url "open_file_explorer" %}')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('directory_path').value = data.directory_path;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
 </body>
 </html>

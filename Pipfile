@@ -9,6 +9,7 @@ psycopg2 = "*"
 astropy = "*"
 pandas = "*"
 openpyxl = "*"
+django-queryset-csv = "*"
 
 [dev-packages]
 pre-commit = "*"
