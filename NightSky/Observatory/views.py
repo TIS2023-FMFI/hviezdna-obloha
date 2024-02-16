@@ -164,7 +164,7 @@ def export_fits(request):  # TODO: REMOVE PRINTS
         target_path = request.POST.get("target_directory_path")
 
         if not target_path:
-            return JsonResponse({"error_message": "Directory Error: No target directory selected!"})
+            return JsonResponse({"error_message": "Directory Error: No target directory selected!"}, status=400)
 
         # SQL query form processing
         if request.POST.get("is_sql"):
@@ -183,9 +183,9 @@ def export_fits(request):  # TODO: REMOVE PRINTS
                     })
 
                 except Exception as e:
-                    return JsonResponse({"error_message": f"SQL Error: {str(e)}"})
+                    return JsonResponse({"error_message": f"SQL Error: {str(e)}"}, status=500)
             else:
-                return JsonResponse({"error_message": "SQL Error: SQL input is empty."})
+                return JsonResponse({"error_message": "SQL Error: SQL input is empty."}, status=400)
 
         # Export form processing
         elif form.is_valid():
@@ -241,7 +241,7 @@ def copy_data(request):
 
         # Ensure target path exists
         if not os.path.exists(target_path):
-            return JsonResponse({"error_message": "Directory Error: Target directory doesn't exist."})
+            return JsonResponse({"error_message": "Directory Error: Target directory doesn't exist."}, status=400)
 
         queryset = FitsImage.objects.filter(pk__in=ids)
         status = copy_data_to_target(source_paths, target_path)
@@ -250,10 +250,13 @@ def copy_data(request):
         if status.startswith("Copied successfully"):
             csv_writer = CsvWriter(queryset)
             csv_writer.write(target_path)
+            return JsonResponse({"status": status})
 
-        return JsonResponse({"status": status})
+        # If copy_data_to_target() did not return success, return an error response
+        return JsonResponse({"error_message": status}, status=400)
 
-    return JsonResponse({"error_message": "Invalid request method."})
+    # 405 Method Not Allowed
+    return JsonResponse({"error_message": "Invalid request method."}, status=405, headers={"Allow": "POST"})
 
 
 def copy_data_to_target(source_paths: Union[List[str], List[os.PathLike]], target_path: Union[str, os.PathLike]) -> str:

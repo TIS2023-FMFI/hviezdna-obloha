@@ -114,8 +114,6 @@ PATH
                     >SELECT * FROM Observatory_fitsimage </textarea>
                     <input type="hidden" name="sql_export">
                 </div>
-                <div id="sql_input_error" class="alert-danger"></div>
-                <div id="sql_input_success" class="alert-success"></div>
             </div>
 
         </div>
@@ -123,6 +121,9 @@ PATH
         <div class="content_part" id="export_model_form">
             {{ form.as_div }}
         </div>
+        
+        <div id="sql_input_error" class="alert-danger"></div>
+        <div id="sql_input_success" class="alert-success"></div>
 
         <button type="submit" id="submit_export">EXPORT</button>
 
@@ -239,15 +240,6 @@ PATH
     </div>
 </div>
 
-
-<!-- Wrong SQL query Pop-up window -->
-<div id="SQLqueryModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('SQLqueryModal')">&times;</span>
-        <p id="ErrorMessage"></p>
-    </div>
-</div>
-
 <script>
     function triggerFileExplorer() {
         fetch('{% url "open_file_explorer" %}')
@@ -262,119 +254,131 @@ PATH
         var modal = document.getElementById(modalId);
         modal.style.display = 'none';
     }
-</script>
 
-<script>
-    document.getElementById('export_form').onsubmit = function (event) {
-        event.preventDefault();
-        // send serialized data to the server
-        jQuery.ajax({
-            url: '{% url 'export_fits' %}', // URL to Django view that executes the SQL query
-            type: 'POST',
-            data: jQuery(this).serialize(),
-            success: function (response) {
-                // Cache jQuery objects for error message containers
-                const $sqlInputError = jQuery('#sql_input_error');
-                const $targetDirectoryPathError = jQuery('#target_directory_path_error');
+document.getElementById('export_form').onsubmit = function (event) {
+    event.preventDefault(); // Prevent form submission
 
-                // Clear previous error messages first
-                $sqlInputError.empty();
-                $targetDirectoryPathError.empty();
-                jQuery('#sql_input_success').empty();
+    // Define error message containers once to avoid repetition
+    const $sqlInputError = jQuery('#sql_input_error');
+    const $targetDirectoryPathError = jQuery('#target_directory_path_error');
+    const $sqlInputSuccess = jQuery('#sql_input_success');
 
-                if (response.error_message) {
-                    if (response.error_message.includes("SQL")) {
-                        // If the error message is related to SQL, show it under the SQL input
-                        $sqlInputError.text(response.error_message).show();
-                    } else if (response.error_message.includes("directory")) {
-                        // If the error message is related to directory path, show it under the directory path input
-                        $targetDirectoryPathError.text(response.error_message).show();
-                    }
-                } else {
-                    console.log('AJAX success callback');
-
-                    const $exportModal = jQuery('#ExportModal');
-
-                    jQuery('#ExportModal .modal-body').html(`Do you want to export ${response.source_paths.length} FITS images into:<br>"${response.target_path}"?`);
-
-                    $exportModal.data('ids', response.ids);
-                    $exportModal.data('source_paths', response.source_paths);
-                    $exportModal.data('target_path', response.target_path);
-
-                    document.getElementById('ExportModal').style.display = 'block';
-                    console.log('Modal displayed');
-                }
-
-            },
-            error: function (xhr, status, error) {
-                // Clear previous error messages first
-                jQuery('#sql_input_error').empty();
-                jQuery('#target_directory_path_error').empty();
-
-                console.error('AJAX error callback');
-                console.error('Error:', error);
-                alert('An error occurred');
-            }
-        });
+    // Function to clear previous messages
+    function clearMessages() {
+        $sqlInputError.empty();
+        $targetDirectoryPathError.empty();
+        $sqlInputSuccess.empty();
     }
 
-    // bind to confirm button's click in the modal
-    jQuery('#confirmBtn').on('click', function () {
-        console.log('Confirm button clicked');
+    // AJAX request
+    jQuery.ajax({
+        url: '{% url "export_fits" %}', // Ensure this is dynamically rendered by Django templating
+        type: 'POST',
+        data: jQuery(this).serialize(), // Serialize form data
+        success: function (response) {
+            clearMessages(); // Clear messages on new submission
 
-        const $exportModal = jQuery('#ExportModal');
+            console.log('AJAX success callback');
+            const $exportModal = jQuery('#ExportModal');
+            const modalBodyHtml = `Do you want to export ${response.source_paths.length} FITS images into:<br>"${response.target_path}"?`;
 
-        const ids = $exportModal.data('ids');
-        const sourcePaths = $exportModal.data('source_paths');
-        const targetPath = $exportModal.data('target_path');
+            // Update modal content and show it
+            $exportModal.find('.modal-body').html(modalBodyHtml);
+            $exportModal.data({ 'ids': response.ids, 'source_paths': response.source_paths, 'target_path': response.target_path })
+                        .show();
+            console.log('Modal displayed');
+        },
+        error: function (xhr) {
+            clearMessages(); // Clear messages on new submission
+            console.error('AJAX error callback:', xhr.status, xhr.statusText);
 
-        jQuery.ajax({
-            url: '{% url 'copy_data' %}',
-            type: 'POST',
-            traditional: true,
-            data: {
-                'csrfmiddlewaretoken': jQuery('input[name=csrfmiddlewaretoken]').val(),
-                'ids': ids,
-                'source_paths': sourcePaths,
-                'target_path': targetPath
-            },
-            success: function (response) {
-                const $targetDirectoryPathError = jQuery('#target_directory_path_error');
-                const $sqlInputError = jQuery('#sql_input_error');
-                const $sqlInputSuccess = jQuery('#sql_input_success');
-
-                $targetDirectoryPathError.empty();
-                $sqlInputError.empty()
-                $sqlInputSuccess.empty();
-
-                if (response.error_message.includes("directory")) {
-                    // If the error message is related to directory path, show it under the directory path input
-                    $targetDirectoryPathError.text(response.error_message).show();
-                } else if (response.status.includes("Copied successfully")) {
-                    console.log('Second AJAX success callback');
-                    console.log('Response received:', response);
-                    document.getElementById('ExportModal').style.display = 'none';
-                    $sqlInputSuccess.text(response.status).show();
-                } else {
-                    if (response.error_message) {
-                        $sqlInputError.text(response.error_message).show();
-                    } else {
-                        $sqlInputError.text(response.status).show();
-                    }
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('Second AJAX error callback');
-                console.error('Error:', error);
-                alert(`An error occurred while exporting the files. Status: ${status}`);
+            let response;
+            try {
+                response = JSON.parse(xhr.responseText);
+            } catch (error) {
+                $sqlInputError.text('Error processing response from server').show();
+                return;
             }
-        });
+            
+            switch (xhr.status) {
+                case 400: // Client-side error
+                    const errorMessage = response.error_message || 'Invalid input detected';
+                    if (errorMessage.includes("Directory")) {
+                        $targetDirectoryPathError.text(errorMessage).show();
+                    } else {
+                        $sqlInputError.text(errorMessage).show();
+                    }
+                    break;
+                case 500: // Server-side error
+                    $sqlInputError.text(response.error_message || 'Server error occurred').show();
+                    break;
+                default: // Handle other unexpected errors
+                    $sqlInputError.text('An unexpected error occurred. Please try again.').show();
+                    break;
+            }
+        }
     });
+};
 
-    jQuery('#cancelBtn').on('click', function () {
-        console.log('Cancel button clicked');
-        document.getElementById('ExportModal').style.display = 'none';
+
+// bind to confirm button's click in the modal
+jQuery('#confirmBtn').on('click', function () {
+    console.log('Confirm button clicked');
+
+    const $exportModal = jQuery('#ExportModal');
+
+    const ids = $exportModal.data('ids');
+    const sourcePaths = $exportModal.data('source_paths');
+    const targetPath = $exportModal.data('target_path');
+    
+    // Define error message containers once to avoid repetition
+    const $sqlInputError = jQuery('#sql_input_error');
+    const $targetDirectoryPathError = jQuery('#target_directory_path_error');
+    const $sqlInputSuccess = jQuery('#sql_input_success');
+
+    // Function to clear previous messages
+    function clearMessages() {
+        $sqlInputError.empty();
+        $targetDirectoryPathError.empty();
+        $sqlInputSuccess.empty();
+    }
+
+    jQuery.ajax({
+        url: '{% url 'copy_data' %}',
+        type: 'POST',
+        traditional: true,
+        data: {
+            'csrfmiddlewaretoken': jQuery('input[name=csrfmiddlewaretoken]').val(),
+            'ids': ids,
+            'source_paths': sourcePaths,
+            'target_path': targetPath
+        },
+        success: function (response) {
+            clearMessages()
+            
+            $sqlInputSuccess.text(response.status).show();
+            document.getElementById('ExportModal').style.display = 'none';
+        },
+        error: function (xhr) {
+            clearMessages()
+            
+            const response = JSON.parse(xhr.responseText);
+            
+            if (response.error_message) {
+                if (response.error_message.includes("directory")) {
+                    $targetDirectoryPathError.text(response.error_message).show();
+                } else {
+                    $sqlInputError.text(response.error_message).show();
+                }
+            }
+        }
     });
+});
+
+jQuery('#cancelBtn').on('click', function () {
+    console.log('Cancel button clicked');
+    document.getElementById('ExportModal').style.display = 'none';
+});
 </script>
 
 </body>
