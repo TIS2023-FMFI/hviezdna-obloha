@@ -116,13 +116,13 @@ PATH
                 </div>
             </div>
 
-            <div id="export_model_form">
+            <div id="export_model_form" class="form-group">
                 {{ form.as_div }}
             </div>
-            
+
             <div id="sql_input_error" class="alert-danger"></div>
             <div id="sql_input_success" class="alert-success"></div>
-    
+
             <button type="submit" id="submit_export">EXPORT</button>
         </div>
 
@@ -298,7 +298,7 @@ document.getElementById('export_form').onsubmit = function (event) {
                 $sqlInputError.text('Error processing response from server').show();
                 return;
             }
-            
+
             switch (xhr.status) {
                 case 400: // Client-side error
                     const errorMessage = response.error_message || 'Invalid input detected';
@@ -329,7 +329,7 @@ jQuery('#confirmBtn').on('click', function () {
     const ids = $exportModal.data('ids');
     const sourcePaths = $exportModal.data('source_paths');
     const targetPath = $exportModal.data('target_path');
-    
+
     // Define error message containers once to avoid repetition
     const $sqlInputError = jQuery('#sql_input_error');
     const $targetDirectoryPathError = jQuery('#target_directory_path_error');
@@ -354,16 +354,16 @@ jQuery('#confirmBtn').on('click', function () {
         },
         success: function (response) {
             clearMessages()
-            
+
             $sqlInputSuccess.text(response.status).show();
             document.getElementById('ExportModal').style.display = 'none';
         },
         error: function (xhr) {
             clearMessages()
             document.getElementById('ExportModal').style.display = 'none';
-            
+
             const response = JSON.parse(xhr.responseText);
-            
+
             if (response.error_message) {
                 if (response.error_message.includes("directory")) {
                     $targetDirectoryPathError.text(response.error_message).show();
