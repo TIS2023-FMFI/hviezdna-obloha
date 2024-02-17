@@ -277,10 +277,8 @@ def copy_data_to_target(source_paths: Union[List[str], List[os.PathLike]], targe
 
 
 def is_valid_sql_query(query):
-    query = query.strip()
-    if re.search(r"\b(DELETE|DROP|TRUNCATE|CREATE|ALTER|RENAME|INSERT|UPDATE|GRANT|REVOKE)\b", query):
-        return False
-    return True
+    disallowed_keywords = r"\b(DELETE|DROP|TRUNCATE|CREATE|ALTER|RENAME|INSERT|UPDATE|GRANT|REVOKE)\b"
+    return not re.search(disallowed_keywords, query.strip(), re.IGNORECASE)
 
 
 def add_quotes(query):

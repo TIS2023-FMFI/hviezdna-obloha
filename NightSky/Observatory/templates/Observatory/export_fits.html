@@ -116,16 +116,15 @@ PATH
                 </div>
             </div>
 
+            <div id="export_model_form">
+                {{ form.as_div }}
+            </div>
+            
+            <div id="sql_input_error" class="alert-danger"></div>
+            <div id="sql_input_success" class="alert-success"></div>
+    
+            <button type="submit" id="submit_export">EXPORT</button>
         </div>
-
-        <div class="content_part" id="export_model_form">
-            {{ form.as_div }}
-        </div>
-        
-        <div id="sql_input_error" class="alert-danger"></div>
-        <div id="sql_input_success" class="alert-success"></div>
-
-        <button type="submit" id="submit_export">EXPORT</button>
 
     </form>
 </div>
@@ -361,6 +360,7 @@ jQuery('#confirmBtn').on('click', function () {
         },
         error: function (xhr) {
             clearMessages()
+            document.getElementById('ExportModal').style.display = 'none';
             
             const response = JSON.parse(xhr.responseText);
             
