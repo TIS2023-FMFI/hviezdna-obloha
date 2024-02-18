@@ -1,47 +1,37 @@
-import os
-import re
-import shutil
-import tkinter as tk
-from datetime import datetime, timedelta
-from tkinter import filedialog
-from typing import List, Union
-
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
 from django.forms import MultipleChoiceField
-from django.http import JsonResponse
-from django.shortcuts import render, redirect
+
+import tkinter as tk
+from tkinter import filedialog
+
+import os
+import shutil
+from typing import List, Union
 
 from .forms import (
     DirectoryForm,
     ExportForm,
     MultipleIntegerIntervalsField,
     MultipleFloatIntervalsField,
-    MultipleStringsField, DateObsField
+    MultipleStringsField,
+    DateObsField
 )
 from .models import FitsImage
-from .scripts.create_log import Log
 from .scripts.csv_writer import CsvWriter
+from .scripts.insert import Insert
+from .scripts.create_log import Log
 from .scripts.first_insert import process_folders_with_fits
 from .scripts.generate_sky_map import generate_sky_map
-from .scripts.insert import Insert
+from .scripts.config import Config
+
+from datetime import datetime, timedelta
+import re
 
 
-def open_file_explorer(request):
-    root = tk.Tk()
-    root.withdraw()
-    root.attributes("-topmost", True)  # bring the window to the top
-    options = {
-        "initialdir": "/fits-images",
-        "title": "Select Directory",
-        "mustexist": True,
-        "parent": root,
-    }
-    directory_path = filedialog.askdirectory(**options)
-    root.destroy()
-    return JsonResponse({"directory_path": directory_path})
-
-
+# home.html functions
 def home(request):
     context = {
         "nights": number_of_nights(request),
@@ -53,11 +43,48 @@ def home(request):
     return render(request, "Observatory/home.html", context)
 
 
+def number_of_nights(request):
+    if FitsImage.objects.exists():
+        date_obs_values = FitsImage.objects.values_list("DATE_OBS", flat=True)
+
+        adjusted_dates = set()
+        for date_obs in date_obs_values:
+            if date_obs is not None:
+                date_time = datetime.strptime(date_obs, "%Y-%m-%dT%H:%M:%S.%f")
+
+                if date_time.time() < datetime.strptime("12:00:00", "%H:%M:%S").time():
+                    date_time -= timedelta(days=1)
+                adjusted_dates.add(date_time.date())
+        return len(adjusted_dates)
+    return None
+
+
+def number_of_frames(request):
+    return FitsImage.objects.count() if FitsImage.objects.exists() else None
+
+
+def last_light_frames_night(request):
+    return FitsImage.objects.filter(IMAGETYP="LIGHT").latest("DATE_OBS").DATE_OBS \
+        if FitsImage.objects.filter(IMAGETYP="LIGHT").exists() else None
+
+
+def last_calib_frames_night(request):
+    return FitsImage.objects.filter(IMAGETYP="CALIB").latest("DATE_OBS").DATE_OBS \
+        if FitsImage.objects.filter(IMAGETYP="CALIB").exists() else None
+
+
+def last_ccd_temperature(request):
+    return FitsImage.objects.latest("DATE_OBS").CCD_TEMP if FitsImage.objects.exists() else None
+
+
+# import_fits.html functions
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
 
     # TODO: encapsulate config parser
-    path = os.environ.get("FITS_ARCHIVE", r"/fits-images")
+
+    path = Config.get_property('Paths', 'fits_archive')
+
     # Get the last added directory path in the archive
     last_added_directory_path = get_last_added_directory_path(path, request)
 
@@ -117,6 +144,15 @@ def process_and_log_directory(directory_path, request):
         return None
 
 
+def open_file_explorer(request):
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes("-topmost", True)  # bring the window to the top
+    directory_path = filedialog.askdirectory()
+    root.destroy()
+    return JsonResponse({"directory_path": directory_path})
+
+
 def filter_fits_images(form_data):
     ...
     # Entry.objects.values_list("id", flat=True).order_by("id")
@@ -137,7 +173,7 @@ def export_fits(request):  # TODO: REMOVE PRINTS
 
             if sql_input:
                 try:
-                    raw_queryset = FitsImage.objects.raw(sql_input)
+                    raw_queryset = execute_sql_query(sql_input)
                     paths = [fits.PATH for fits in raw_queryset]
                     ids = [item.pk for item in raw_queryset]
 
@@ -206,6 +242,13 @@ def export_fits(request):  # TODO: REMOVE PRINTS
     return render(request, "Observatory/export_fits.html", {"form": form})
 
 
+def execute_sql_query(sql_input):
+    return FitsImage.objects.raw(sql_input)
+    # with connection.cursor() as cursor:
+    #     cursor.execute(sql_input)
+    #     return cursor.fetchall()
+
+
 def copy_data(request):
     if request.method == "POST":
         ids = request.POST.getlist("ids")
@@ -249,46 +292,47 @@ def copy_data_to_target(source_paths: Union[List[str], List[os.PathLike]], targe
     return f"Copied successfully to {target_path}"
 
 
-def number_of_nights(request):
-    if FitsImage.objects.exists():
-        date_obs_values = FitsImage.objects.values_list("DATE_OBS", flat=True)
-        adjusted_dates = set()
-        for date_obs in date_obs_values:
-            if date_obs is not None:
-                date_time = datetime.strptime(date_obs, "%Y-%m-%dT%H:%M:%S.%f")
-
-                if date_time.time() < datetime.strptime("12:00:00", "%H:%M:%S").time():
-                    date_time -= timedelta(days=1)
-                adjusted_dates.add(date_time.date())
-        return len(adjusted_dates)
-    return None
-
-
-def number_of_frames(request):
-    return FitsImage.objects.count() if FitsImage.objects.exists() else None
-
-
-def last_light_frames_night(request):
-    return FitsImage.objects.filter(IMAGETYP="LIGHT").latest("DATE_OBS").DATE_OBS \
-        if FitsImage.objects.filter(IMAGETYP="LIGHT").exists() else None
-
-
-def last_calib_frames_night(request):
-    return FitsImage.objects.filter(IMAGETYP="CALIB").latest("DATE_OBS").DATE_OBS \
-        if FitsImage.objects.filter(IMAGETYP="CALIB").exists() else None
-
-
-def last_ccd_temperature(request):
-    return FitsImage.objects.latest("DATE_OBS").CCD_TEMP if FitsImage.objects.exists() else None
-
-
 def is_valid_sql_query(query):
     disallowed_keywords = r"\b(DELETE|DROP|TRUNCATE|CREATE|ALTER|RENAME|INSERT|UPDATE|GRANT|REVOKE)\b"
     return not re.search(disallowed_keywords, query.strip(), re.IGNORECASE)
 
 
 def add_quotes(query):
-    columns = [f.name for f in FitsImage._meta.get_fields()]
+    columns = [
+        "ID",
+        "NAXIS",
+        "NAXIS1",
+        "NAXIS2",
+        "IMAGETYP",
+        "FILTER",
+        "OBJECT_NAME",
+        "SERIES",
+        "NOTES",
+        "DATE_OBS",
+        "MJD_OBS",
+        "EXPTIME",
+        "CCD_TEMP",
+        "XBINNING",
+        "YBINNING",
+        "XORGSUBF",
+        "YORGSUBF",
+        "MODE",
+        "GAIN",
+        "RD_NOISE",
+        "OBSERVER",
+        "RA",
+        "DEC",
+        "RA_PNT",
+        "DEC_PNT",
+        "AZIMUTH",
+        "ELEVATIO",
+        "AIRMASS",
+        "RATRACK",
+        "DECTRACK",
+        "PHASE",
+        "RANGE",
+        "PATH",
+    ]
     query_words = query.split()
     for i in range(len(query_words)):
         word = query_words[i].upper()
@@ -302,8 +346,7 @@ def add_quotes(query):
             if word[:position] in columns:  # if the column name does not contain quotes and a space before the operator
                 query_words[i] = f'"{word[:position]}"' + word[position:]
             if word[
-               1:position - 1] in columns:  # if the column name contains quotes and does not contain a space before
-                # the operator
+               1:position - 1] in columns:  # if the column name contains quotes and does not contain a space before the operator
                 query_words[i] = f'"{word[1:position - 1]}"' + word[position:]
 
     updated_query = " ".join(query_words)
