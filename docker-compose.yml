@@ -21,6 +21,7 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
       - DEBUG=True  # change True to False for production
+#      - ALLOWED_HOSTS=  # set this to a comma separated list of allowed hosts for production
 #      - SECRET_KEY=  # set this to a securely generated long random value for production
     depends_on:
       - db
