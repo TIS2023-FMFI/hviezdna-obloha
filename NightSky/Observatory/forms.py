@@ -12,6 +12,54 @@ class DirectoryForm(forms.Form):
 
 
 # TODO: zlepsit medzery v inpute
+class DateObsField(forms.CharField):
+    def to_python(self, value):
+        value = value.replace(" ", "")
+
+        if not value:
+            return None
+
+        clean_integers = []
+        integer_intervals = []
+        raw_left_endpoint = ""
+        input_values = value.split(",")
+
+        for raw_value in input_values:
+            if "[" in raw_value and raw_left_endpoint:
+                raise forms.ValidationError("Invalid format.")
+
+            elif "[" in raw_value:
+                raw_left_endpoint = raw_value
+
+            elif "]" in raw_value and not raw_left_endpoint:
+                raise forms.ValidationError("Invalid format.")
+
+            elif "]" in raw_value:
+                left_endpoint = raw_left_endpoint[1:]
+                right_endpoint = raw_value[:-1]
+
+                # if not is_integer(left_endpoint) or not is_integer(right_endpoint):
+                #     raise forms.ValidationError("Invalid format.")
+
+                if left_endpoint > right_endpoint:
+                    raise forms.ValidationError("First endpoint of an interval must not be greater than the second one.")
+
+                # TODO: POZOR TU JE ZRADA DO BUDUCNA
+                integer_intervals.append((left_endpoint, right_endpoint))
+                raw_left_endpoint = ""
+
+            elif is_integer(raw_value):
+                clean_integers.append(int(raw_value))
+
+        if raw_left_endpoint:
+            raise forms.ValidationError("Invalid format.")
+
+        return clean_integers, integer_intervals
+
+    def validate(self, value):
+        super().validate(value)
+
+
 class MultipleStringsField(forms.CharField):
     def to_python(self, value):
         value = value.replace(" ", "")
@@ -22,10 +70,16 @@ class MultipleStringsField(forms.CharField):
         return value.split(",")
 
     def validate(self, value):
-        # super().validate(value)
-        # if value is None:
-        #     return
-        return
+        super().validate(value)
+
+
+def is_integer(value):
+    try:
+        int(value)
+    except ValueError:
+        raise forms.ValidationError("Invalid format.")
+
+    return True
 
 
 class MultipleIntegerIntervalsField(forms.CharField):
@@ -76,26 +130,14 @@ class MultipleIntegerIntervalsField(forms.CharField):
         return clean_integers, integer_intervals
 
     def validate(self, value):
-        # super().validate(value)
-        # if value is None:
-        #     return
-        return
-
-
-def is_integer(value):
-    try:
-        int(value)
-    except ValueError:
-        raise forms.ValidationError("Invalid woof format.")
-
-    return True
+        super().validate(value)
 
 
 def is_float(value):
     try:
         float(value)
     except ValueError:
-        raise forms.ValidationError("Invalid woof format.")
+        raise forms.ValidationError("Invalid format.")
 
     return True
 
@@ -148,10 +190,7 @@ class MultipleFloatIntervalsField(forms.CharField):
         return clean_floats, float_intervals
 
     def validate(self, value):
-        # super().validate(value)
-        # if value is None:
-        #     return
-        return
+        super().validate(value)
 
 
 class ExportForm(forms.Form):
@@ -163,7 +202,7 @@ class ExportForm(forms.Form):
     FILTER = MultipleStringsField(required=False)
     # OBJECT_NAME = MultipleStringsField()
     SERIES = MultipleIntegerIntervalsField(required=False)
-    DATE_OBS = MultipleStringsField(required=False)
+    DATE_OBS = DateObsField(required=False)
 
     MJD_OBS = MultipleFloatIntervalsField(required=False)
     EXPTIME = MultipleFloatIntervalsField(required=False)

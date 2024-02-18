@@ -17,6 +17,7 @@ from .forms import (
     MultipleIntegerIntervalsField,
     MultipleFloatIntervalsField,
     MultipleStringsField,
+    DateObsField
 )
 from .models import FitsImage
 from .scripts.csv_writer import CsvWriter
@@ -202,7 +203,7 @@ def export_fits(request):  # TODO: REMOVE PRINTS
                 if not field_input:
                     continue
 
-                if isinstance(field, (MultipleIntegerIntervalsField, MultipleFloatIntervalsField)):
+                if isinstance(field, (MultipleIntegerIntervalsField, MultipleFloatIntervalsField, DateObsField)):
                     exact_values, intervals = field_input
                     q_objects = Q(**{"%s__in" % field_name: exact_values})
 
@@ -214,6 +215,16 @@ def export_fits(request):  # TODO: REMOVE PRINTS
                 if isinstance(field, (MultipleStringsField, MultipleChoiceField)):
                     q_objects = Q(**{"%s__in" % field_name: field_input})
                     queryset = queryset.filter(q_objects)
+
+                # if isinstance(field, DateObsField):
+                #     exact_values, intervals = field_input
+                #     q_objects = Q(**{"%s__in" % field_name: exact_values})
+                #
+                #     for left_endpoint, right_endpoint in intervals:
+                #         q_objects |= Q(**{"%s__gte" % field_name: left_endpoint})
+                #         q_objects |= Q(**{"%s__lte" % field_name: right_endpoint})
+                #
+                #     queryset = queryset.filter(q_objects)
 
             paths = queryset.values_list("PATH", flat=True)
             csv_writer = CsvWriter(queryset)
