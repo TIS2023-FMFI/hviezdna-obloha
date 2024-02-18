@@ -42,7 +42,8 @@ class DateObsField(forms.CharField):
                 #     raise forms.ValidationError("Invalid format.")
 
                 if left_endpoint > right_endpoint:
-                    raise forms.ValidationError("First endpoint of an interval must not be greater than the second one.")
+                    raise forms.ValidationError(
+                        "First endpoint of an interval must not be greater than the second one.")
 
                 # TODO: POZOR TU JE ZRADA DO BUDUCNA
                 integer_intervals.append((left_endpoint, right_endpoint))
@@ -194,48 +195,47 @@ class MultipleFloatIntervalsField(forms.CharField):
 
 
 class ExportForm(forms.Form):
-    NAXIS = MultipleIntegerIntervalsField(required=False)
-    NAXIS1 = MultipleIntegerIntervalsField(required=False)
-    NAXIS2 = MultipleIntegerIntervalsField(required=False)
+    primary_fields = ['OBJECT_NAME', 'SERIES', 'EXPTIME', 'FILTER', 'DATE_OBS', 'IMAGETYP', 'CCD_TEMP', 'RA', 'DEC']
 
-    IMAGETYP = MultipleStringsField(required=False)
-    FILTER = MultipleStringsField(required=False)
-    # OBJECT_NAME = MultipleStringsField()
-    SERIES = MultipleIntegerIntervalsField(required=False)
-    DATE_OBS = DateObsField(required=False)
+    OBJECT_NAME = MultipleStringsField(widget=forms.TextInput(attrs={"placeholder": "String"}), required=False)
+    SERIES = MultipleStringsField(widget=forms.TextInput(attrs={"placeholder": "String"}), required=False)
+    EXPTIME = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    FILTER = MultipleStringsField(widget=forms.TextInput(attrs={"placeholder": "String"}), required=False)
+    DATE_OBS = DateObsField(widget=forms.TextInput(attrs={"placeholder": "String"}), required=False)
+    IMAGETYP = MultipleStringsField(widget=forms.TextInput(attrs={"placeholder": "String"}), required=False)
+    CCD_TEMP = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    RA = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    DEC = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
 
-    MJD_OBS = MultipleFloatIntervalsField(required=False)
-    EXPTIME = MultipleFloatIntervalsField(required=False)
-    CCD_TEMP = MultipleFloatIntervalsField(required=False)
+    NAXIS = MultipleIntegerIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Integer"}), required=False)
+    NAXIS1 = MultipleIntegerIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Integer"}), required=False)
+    NAXIS2 = MultipleIntegerIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Integer"}), required=False)
+    XBINNING = MultipleIntegerIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Integer"}), required=False)
+    YBINNING = MultipleIntegerIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Integer"}), required=False)
+    XORGSUBF = MultipleIntegerIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Integer"}), required=False)
+    YORGSUBF = MultipleIntegerIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Integer"}), required=False)
+    MODE = MultipleIntegerIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Integer"}), required=False)
 
-    XBINNING = MultipleIntegerIntervalsField(required=False)
-    YBINNING = MultipleIntegerIntervalsField(required=False)
-    XORGSUBF = MultipleIntegerIntervalsField(required=False)
-    YORGSUBF = MultipleIntegerIntervalsField(required=False)
-    MODE = MultipleIntegerIntervalsField(required=False)
+    MJD_OBS = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    GAIN = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    RD_NOISE = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    RA_PNT = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    DEC_PNT = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    AZIMUTH = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    ELEVATIO = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    AIRMASS = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    RATRACK = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    DECTRACK = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    PHASE = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
+    RANGE = MultipleFloatIntervalsField(widget=forms.TextInput(attrs={"placeholder": "Float"}), required=False)
 
-    GAIN = MultipleFloatIntervalsField(required=False)
-    RD_NOISE = MultipleFloatIntervalsField(required=False)
+    OBSERVER = MultipleStringsField(widget=forms.TextInput(attrs={"placeholder": "String"}), required=False)
 
-    OBSERVER = MultipleStringsField(required=False)
-
-    RA = MultipleFloatIntervalsField(required=False)
-    DEC = MultipleFloatIntervalsField(required=False)
-    RA_PNT = MultipleFloatIntervalsField(required=False)
-    DEC_PNT = MultipleFloatIntervalsField(required=False)
-    AZIMUTH = MultipleFloatIntervalsField(required=False)
-    ELEVATIO = MultipleFloatIntervalsField(required=False)
-    AIRMASS = MultipleFloatIntervalsField(required=False)
-    RATRACK = MultipleFloatIntervalsField(required=False)
-    DECTRACK = MultipleFloatIntervalsField(required=False)
-    PHASE = MultipleFloatIntervalsField(required=False)
-    RANGE = MultipleFloatIntervalsField(required=False)
-
-    object_name_choices = [
-        (image.OBJECT_NAME, image.OBJECT_NAME)
-        for image in FitsImage.objects.all().distinct("OBJECT_NAME").order_by("OBJECT_NAME")
-    ]
-
-    OBJECT_NAME = forms.MultipleChoiceField(
-        choices=object_name_choices, widget=forms.CheckboxSelectMultiple, required=False
-    )
+    # object_name_choices = [
+    #     (image.OBJECT_NAME, image.OBJECT_NAME)
+    #     for image in FitsImage.objects.all().distinct("OBJECT_NAME").order_by("OBJECT_NAME")
+    # ]
+    #
+    # OBJECT_NAME = forms.MultipleChoiceField(
+    #     choices=object_name_choices, widget=forms.CheckboxSelectMultiple, required=False
+    # )

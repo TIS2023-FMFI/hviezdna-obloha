@@ -119,35 +119,58 @@ PATH
 
             <!--? Export Form -->
             <div id="export_model_form" class="form-group">
-                <!--?                {{ form.as_div }}-->
 
                 <div class="tooltip-icon">
+                    Tooltip
                     <i class="fas fa-info-circle"></i>
                     <article class="tooltip-text">
-                        <p><b>Formát vstupu.</b></p>
-                        <p>Intervaly sa zapisujú vo formáte <em>[x, y]</em>, čo značí uzatvorený interval.<br>
-                            Oddelením čiarkou sa môžu kombinovať viaceré exaktné hodnoty a intervaly.
+                        <p><b>Input Format.</b></p>
+                        <p>Intervals are written in format <em>[x, y]</em> which represent a closed interval.<br>
+                            You can combine multiple exact values and intervals by separating them with commas.
                         </p>
                         <p>
-                            <b>Integer</b><br>
-                            Len celé čísla.
+                            <b>Integer.</b><br>
+                            Only integer numbers and integer intervals are allowed.
                         </p>
                         <p>
-                            <b>Float</b><br>
-                            Desatinné čísla sa píšu s bodkou. Akceptuje sa aj exponenciálny zápis <em>(napríklad 1.23e2)</em> a taktiež celé čísla.
+                            <b>Float.</b><br>
+                            Only decimal point is allowed as a decimal separator. You can also write a float input in
+                            an exponential notation <em>(e.g. 1.23e2)</em> or just as an integer.
                         </p>
-                        <p><b>String</b><br>
-                           Len exaktné reťazce s výnimkou <em>date_obs</em>, ktorý je možné zapísať aj v intervale.
+                        <p><b>String.</b><br>
+                            Only exact string values are allowed except <em>date_obs</em> parameter,
+                            which can be written as an interval.
                         </p>
                     </article>
                 </div>
 
-                {% for field in form %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
+                <div id="visible-fields" class="">
+                    {% for field in form %}
+                    {% if field.name in form.primary_fields %}
+                    <div>
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
                 </div>
-                {% endfor %}
+
+                <button type="button" id="toggle-hidden-fields" class="miscellaneous">
+                    Show Miscellaneous Fields
+                </button>
+
+                <div id="hidden-fields" style="display: none;">
+                    {% for field in form %}
+                    {% if not field.name in form.primary_fields %}
+                    <div>
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+
+
             </div>
 
             <div id="sql_input_error" class="alert-danger"></div>
@@ -171,13 +194,18 @@ PATH
 </div>
 
 <script>
-    // $(document).ready(function () {
-    //     $('.tooltip-icon').each(function () {
-    //         const $this = $(this);
-    //         const tooltipText = $this.data('tooltip');
-    //         $this.append('<span class="tooltip-text">' + tooltipText + '</span>');
-    //     });
-    // });
+    document.getElementById('toggle-hidden-fields').addEventListener('click', function () {
+        const hiddenFieldsDiv = document.getElementById('hidden-fields');
+
+        if (hiddenFieldsDiv.style.display === 'none') {
+            hiddenFieldsDiv.style.display = 'block';
+            this.textContent = 'Hide Miscellaneous Fields';
+
+        } else {
+            hiddenFieldsDiv.style.display = 'none';
+            this.textContent = 'Show Miscellaneous Fields';
+        }
+    });
 
     function triggerFileExplorer() {
         fetch('{% url "open_file_explorer" %}')

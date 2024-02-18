@@ -256,6 +256,8 @@ th, td {
 .tooltip-icon i {
     color: #ffe883;
     cursor: pointer;
+    margin-bottom: 1em;
+    margin-top: 1em;
 }
 
 .tooltip-icon .tooltip-text {
@@ -280,4 +282,9 @@ th, td {
 
 .tooltip-icon:hover .tooltip-text {
     display: inline-block;
+}
+
+.miscellaneous {
+    font-size: 14px;
+    margin: 2em 0;
 }

@@ -81,8 +81,6 @@ def last_ccd_temperature(request):
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
 
-    # TODO: encapsulate config parser
-
     path = Config.get_property('Paths', 'fits_archive')
 
     # Get the last added directory path in the archive
@@ -117,13 +115,17 @@ def get_last_added_directory_path(path, request):
 
 def handle_import(directory_path, request, session_key):
     inserted_rows = process_and_log_directory(directory_path, request)
+
     if inserted_rows is not None:
         messages.success(request, f"Successfully imported {inserted_rows} FITS images.")
+
     request.session["form_submitted"] = session_key
 
 
 def process_and_log_directory(directory_path, request):
-    first_insert = False
+    first_insert = FitsImage.objects.count() == 0
+    print(first_insert)
+
     try:
         if first_insert:
             inserted_rows = process_folders_with_fits(directory_path)
@@ -137,8 +139,10 @@ def process_and_log_directory(directory_path, request):
                 del log
 
             del insert
+
         generate_sky_map()
         return inserted_rows
+
     except FileNotFoundError:
         messages.error(request, "Import failed. Directory does not exist.")
         return None
@@ -216,17 +220,8 @@ def export_fits(request):  # TODO: REMOVE PRINTS
                     q_objects = Q(**{"%s__in" % field_name: field_input})
                     queryset = queryset.filter(q_objects)
 
-                # if isinstance(field, DateObsField):
-                #     exact_values, intervals = field_input
-                #     q_objects = Q(**{"%s__in" % field_name: exact_values})
-                #
-                #     for left_endpoint, right_endpoint in intervals:
-                #         q_objects |= Q(**{"%s__gte" % field_name: left_endpoint})
-                #         q_objects |= Q(**{"%s__lte" % field_name: right_endpoint})
-                #
-                #     queryset = queryset.filter(q_objects)
-
             paths = queryset.values_list("PATH", flat=True)
+            # TODO: remove csv write ???
             csv_writer = CsvWriter(queryset)
             csv_writer.write(target_path)
             ids = [item.pk for item in queryset]
