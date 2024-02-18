@@ -187,6 +187,10 @@ def export_fits(request):  # TODO: REMOVE PRINTS
             else:
                 return JsonResponse({"error_message": "SQL Error: SQL input is empty."}, status=400)
 
+        elif not form.is_valid():
+            return JsonResponse({"error_message": f"Form Error: {[value for value in form.errors.values()]}"},
+                                status=500)
+
         # Export form processing
         elif form.is_valid():
             print(form.cleaned_data)
@@ -215,7 +219,8 @@ def export_fits(request):  # TODO: REMOVE PRINTS
             csv_writer = CsvWriter(queryset)
             csv_writer.write(target_path)
             ids = [item.pk for item in queryset]
-
+            print(ids)
+            print(paths)
             return JsonResponse({"ids": ids, "source_paths": list(paths), "target_path": target_path})
 
         return redirect("export_fits")
