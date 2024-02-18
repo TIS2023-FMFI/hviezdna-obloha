@@ -246,3 +246,38 @@ th, td {
     width: calc(20%); /* Adjust the width of the input field as needed */
     margin-bottom: 5px; /* Adjust the value to set the desired gap */
 }
+
+.tooltip-icon {
+    position: relative;
+    display: inline-block;
+    margin: 5px;
+}
+
+.tooltip-icon i {
+    color: #ffe883;
+    cursor: pointer;
+}
+
+.tooltip-icon .tooltip-text {
+    display: none;
+    position: absolute;
+    background-color: rgb(132, 166, 165);
+    text-align: justify;
+    color: #000;
+    border: 1px solid #444444;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 1;
+    top: 100%;
+    left: 0;
+    min-width: 30vw;
+}
+
+.tooltip-icon .tooltip-text:after {
+    content: "";
+    width: 100%;
+}
+
+.tooltip-icon:hover .tooltip-text {
+    display: inline-block;
+}

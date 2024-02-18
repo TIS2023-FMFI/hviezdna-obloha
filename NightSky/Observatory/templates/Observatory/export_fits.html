@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Charon's Little Helper - Import Fits</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="{% static 'jquery-3.7.1.js' %}"></script>
 </head>
 
@@ -116,8 +117,37 @@ PATH
                 </div>
             </div>
 
+            <!--? Export Form -->
             <div id="export_model_form" class="form-group">
-                {{ form.as_div }}
+                <!--?                {{ form.as_div }}-->
+
+                <div class="tooltip-icon">
+                    <i class="fas fa-info-circle"></i>
+                    <article class="tooltip-text">
+                        <p><b>Formát vstupu.</b></p>
+                        <p>Intervaly sa zapisujú vo formáte <em>[x, y]</em>, čo značí uzatvorený interval.<br>
+                            Oddelením čiarkou sa môžu kombinovať viaceré exaktné hodnoty a intervaly.
+                        </p>
+                        <p>
+                            <b>Integer</b><br>
+                            Len celé čísla.
+                        </p>
+                        <p>
+                            <b>Float</b><br>
+                            Desatinné čísla sa píšu s bodkou. Akceptuje sa aj exponenciálny zápis <em>(napríklad 1.23e2)</em> a taktiež celé čísla.
+                        </p>
+                        <p><b>String</b><br>
+                           Len exaktné reťazce s výnimkou <em>date_obs</em>, ktorý je možné zapísať aj v intervale.
+                        </p>
+                    </article>
+                </div>
+
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+                {% endfor %}
             </div>
 
             <div id="sql_input_error" class="alert-danger"></div>
@@ -128,105 +158,6 @@ PATH
 
     </form>
 </div>
-
-<!--?            {# <label for="{{ form.object.id_for_label }}">Object:</label><br>#}-->
-<!--?            {# <label>#}-->
-<!--?            {# <select name="{{ form.object.name }}" multiple>#}-->
-<!--?                {# {% for value, label in form.object.field.choices %}#}-->
-<!--?                {#-->
-<!--?                <option value="{{ value }}" #}-->
-<!--?                        {# {% if value in form.object.data %}selected{% endif %}>{{ label }}-->
-<!--?                </option>-->
-<!--?                #}-->
-<!--?                {# {% endfor %}#}-->
-<!--?                {# </select>#}-->
-<!--?            {# </label>#}-->
-<!--?            {# <br>#}-->
-<!-- Other fields here -->
-
-<!--?        {#-->
-<!--?        <form method="post" id="ExportForm" action="{% url 'export_fits' %}">#}-->
-<!--?            {# {% csrf_token %}#}-->
-<!--?            {# {{ form.errors }}#}-->
-<!--?            {##}-->
-<!--?            {#-->
-<!--?            <script>#-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                document.write(-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "<div class=\"checkbox-container\">" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "{% for field in form %}" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "<label>" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "<input type=\"checkbox\" id=\"checkbox-{{ field.auto_id }}\" name=\"{{ field.name }}\"" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "value=\"{{ field.value }}\" onchange=\"toggleVisibility('{{ field.auto_id }}')\">" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "{{ field.label }}" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "</label>" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "{% endfor %}" +-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#-->
-<!--?                "</div>"-->
-<!--?            #-->
-<!--?            }-->
-<!--?            {#                )#-->
-<!--?            }-->
-<!--?            {#            </script>-->
-<!--?            #}-->
-<!--?            {##}-->
-<!--?            {#-->
-<!--?            <div class="checkbox-container">#}-->
-<!--?                {# {% for field in form %}#}-->
-<!--?                {# <label>#}-->
-<!--?                    {# <input type="checkbox" id="checkbox-{{ field.auto_id }}" name="{{ field.name }}" #}-->
-<!--?                              {# value="{{ field.value }}" onchange="toggleVisibility('{{ field.auto_id }}')">#}-->
-<!--?                    {# {{ field.label }}#}-->
-<!--?                    {# </label>#}-->
-<!--?                {# {% endfor %}#}-->
-<!--?                {#-->
-<!--?            </div>-->
-<!--?            #}-->
-<!--?            {##}-->
-<!--?            {# {% for field in form %}#}-->
-<!--?            {#-->
-<!--?            <div hidden="hidden" id="div-{{ field.auto_id }}" class="field-input">#}-->
-<!--?                {# <label>#}-->
-<!--?                    {# {{ field.label }}#}-->
-<!--?                    {# </label>#}-->
-<!--?                {# {{ field. }}#}-->
-<!--?                {#-->
-<!--?            </div>-->
-<!--?            #}-->
-<!--?            {# {% endfor %}#}-->
-<!--?            {#-->
-<!--?            <button type="submit" style="margin: 10px">Submit</button>-->
-<!--?            #}-->
-<!--?            {#-->
-<!--?        </form>-->
-<!--?        #}-->
 
 <!-- Export Pop-up window -->
 <div id="ExportModal" class="modal">
@@ -240,6 +171,14 @@ PATH
 </div>
 
 <script>
+    // $(document).ready(function () {
+    //     $('.tooltip-icon').each(function () {
+    //         const $this = $(this);
+    //         const tooltipText = $this.data('tooltip');
+    //         $this.append('<span class="tooltip-text">' + tooltipText + '</span>');
+    //     });
+    // });
+
     function triggerFileExplorer() {
         fetch('{% url "open_file_explorer" %}')
                 .then(response => response.json())
@@ -254,131 +193,135 @@ PATH
         modal.style.display = 'none';
     }
 
-document.getElementById('export_form').onsubmit = function (event) {
-    event.preventDefault(); // Prevent form submission
+    document.getElementById('export_form').onsubmit = function (event) {
+        event.preventDefault(); // Prevent form submission
 
-    // Define error message containers once to avoid repetition
-    const $sqlInputError = jQuery('#sql_input_error');
-    const $targetDirectoryPathError = jQuery('#target_directory_path_error');
-    const $sqlInputSuccess = jQuery('#sql_input_success');
+        // Define error message containers once to avoid repetition
+        const $sqlInputError = jQuery('#sql_input_error');
+        const $targetDirectoryPathError = jQuery('#target_directory_path_error');
+        const $sqlInputSuccess = jQuery('#sql_input_success');
 
-    // Function to clear previous messages
-    function clearMessages() {
-        $sqlInputError.empty();
-        $targetDirectoryPathError.empty();
-        $sqlInputSuccess.empty();
-    }
-
-    // AJAX request
-    jQuery.ajax({
-        url: '{% url "export_fits" %}', // Ensure this is dynamically rendered by Django templating
-        type: 'POST',
-        data: jQuery(this).serialize(), // Serialize form data
-        success: function (response) {
-            clearMessages(); // Clear messages on new submission
-
-            console.log('AJAX success callback');
-            const $exportModal = jQuery('#ExportModal');
-            const modalBodyHtml = `Do you want to export ${response.source_paths.length} FITS images into:<br>"${response.target_path}"?`;
-
-            // Update modal content and show it
-            $exportModal.find('.modal-body').html(modalBodyHtml);
-            $exportModal.data({ 'ids': response.ids, 'source_paths': response.source_paths, 'target_path': response.target_path })
-                        .show();
-            console.log('Modal displayed');
-        },
-        error: function (xhr) {
-            clearMessages(); // Clear messages on new submission
-            console.error('AJAX error callback:', xhr.status, xhr.statusText);
-
-            let response;
-            try {
-                response = JSON.parse(xhr.responseText);
-            } catch (error) {
-                $sqlInputError.text('Error processing response from server').show();
-                return;
-            }
-
-            switch (xhr.status) {
-                case 400: // Client-side error
-                    const errorMessage = response.error_message || 'Invalid input detected';
-                    if (errorMessage.includes("Directory")) {
-                        $targetDirectoryPathError.text(errorMessage).show();
-                    } else {
-                        $sqlInputError.text(errorMessage).show();
-                    }
-                    break;
-                case 500: // Server-side error
-                    $sqlInputError.text(response.error_message || 'Server error occurred').show();
-                    break;
-                default: // Handle other unexpected errors
-                    $sqlInputError.text('An unexpected error occurred. Please try again.').show();
-                    break;
-            }
+        // Function to clear previous messages
+        function clearMessages() {
+            $sqlInputError.empty();
+            $targetDirectoryPathError.empty();
+            $sqlInputSuccess.empty();
         }
-    });
-};
 
+        // AJAX request
+        jQuery.ajax({
+            url: '{% url "export_fits" %}', // Ensure this is dynamically rendered by Django templating
+            type: 'POST',
+            data: jQuery(this).serialize(), // Serialize form data
+            success: function (response) {
+                clearMessages(); // Clear messages on new submission
 
-// bind to confirm button's click in the modal
-jQuery('#confirmBtn').on('click', function () {
-    console.log('Confirm button clicked');
+                console.log('AJAX success callback');
+                const $exportModal = jQuery('#ExportModal');
+                const modalBodyHtml = `Do you want to export ${response.source_paths.length} FITS images into:<br>"${response.target_path}"?`;
 
-    const $exportModal = jQuery('#ExportModal');
+                // Update modal content and show it
+                $exportModal.find('.modal-body').html(modalBodyHtml);
+                $exportModal.data({
+                    'ids': response.ids,
+                    'source_paths': response.source_paths,
+                    'target_path': response.target_path
+                })
+                        .show();
+                console.log('Modal displayed');
+            },
+            error: function (xhr) {
+                clearMessages(); // Clear messages on new submission
+                console.error('AJAX error callback:', xhr.status, xhr.statusText);
 
-    const ids = $exportModal.data('ids');
-    const sourcePaths = $exportModal.data('source_paths');
-    const targetPath = $exportModal.data('target_path');
+                let response;
+                try {
+                    response = JSON.parse(xhr.responseText);
+                } catch (error) {
+                    $sqlInputError.text('Error processing response from server').show();
+                    return;
+                }
 
-    // Define error message containers once to avoid repetition
-    const $sqlInputError = jQuery('#sql_input_error');
-    const $targetDirectoryPathError = jQuery('#target_directory_path_error');
-    const $sqlInputSuccess = jQuery('#sql_input_success');
-
-    // Function to clear previous messages
-    function clearMessages() {
-        $sqlInputError.empty();
-        $targetDirectoryPathError.empty();
-        $sqlInputSuccess.empty();
-    }
-
-    jQuery.ajax({
-        url: '{% url 'copy_data' %}',
-        type: 'POST',
-        traditional: true,
-        data: {
-            'csrfmiddlewaretoken': jQuery('input[name=csrfmiddlewaretoken]').val(),
-            'ids': ids,
-            'source_paths': sourcePaths,
-            'target_path': targetPath
-        },
-        success: function (response) {
-            clearMessages()
-
-            $sqlInputSuccess.text(response.status).show();
-            document.getElementById('ExportModal').style.display = 'none';
-        },
-        error: function (xhr) {
-            clearMessages()
-            document.getElementById('ExportModal').style.display = 'none';
-
-            const response = JSON.parse(xhr.responseText);
-
-            if (response.error_message) {
-                if (response.error_message.includes("directory")) {
-                    $targetDirectoryPathError.text(response.error_message).show();
-                } else {
-                    $sqlInputError.text(response.error_message).show();
+                switch (xhr.status) {
+                    case 400: // Client-side error
+                        const errorMessage = response.error_message || 'Invalid input detected';
+                        if (errorMessage.includes("Directory")) {
+                            $targetDirectoryPathError.text(errorMessage).show();
+                        } else {
+                            $sqlInputError.text(errorMessage).show();
+                        }
+                        break;
+                    case 500: // Server-side error
+                        $sqlInputError.text(response.error_message || 'Server error occurred').show();
+                        break;
+                    default: // Handle other unexpected errors
+                        $sqlInputError.text('An unexpected error occurred. Please try again.').show();
+                        break;
                 }
             }
-        }
-    });
-});
+        });
+    };
 
-jQuery('#cancelBtn').on('click', function () {
-    console.log('Cancel button clicked');
-    document.getElementById('ExportModal').style.display = 'none';
-});
+
+    // bind to confirm button's click in the modal
+    jQuery('#confirmBtn').on('click', function () {
+        console.log('Confirm button clicked');
+
+        const $exportModal = jQuery('#ExportModal');
+
+        const ids = $exportModal.data('ids');
+        const sourcePaths = $exportModal.data('source_paths');
+        const targetPath = $exportModal.data('target_path');
+
+        // Define error message containers once to avoid repetition
+        const $sqlInputError = jQuery('#sql_input_error');
+        const $targetDirectoryPathError = jQuery('#target_directory_path_error');
+        const $sqlInputSuccess = jQuery('#sql_input_success');
+
+        // Function to clear previous messages
+        function clearMessages() {
+            $sqlInputError.empty();
+            $targetDirectoryPathError.empty();
+            $sqlInputSuccess.empty();
+        }
+
+        jQuery.ajax({
+            url: '{% url 'copy_data' %}',
+            type: 'POST',
+            traditional: true,
+            data: {
+                'csrfmiddlewaretoken': jQuery('input[name=csrfmiddlewaretoken]').val(),
+                'ids': ids,
+                'source_paths': sourcePaths,
+                'target_path': targetPath
+            },
+            success: function (response) {
+                clearMessages()
+
+                $sqlInputSuccess.text(response.status).show();
+                document.getElementById('ExportModal').style.display = 'none';
+            },
+            error: function (xhr) {
+                clearMessages()
+                document.getElementById('ExportModal').style.display = 'none';
+
+                const response = JSON.parse(xhr.responseText);
+
+                if (response.error_message) {
+                    if (response.error_message.includes("directory")) {
+                        $targetDirectoryPathError.text(response.error_message).show();
+                    } else {
+                        $sqlInputError.text(response.error_message).show();
+                    }
+                }
+            }
+        });
+    });
+
+    jQuery('#cancelBtn').on('click', function () {
+        console.log('Cancel button clicked');
+        document.getElementById('ExportModal').style.display = 'none';
+    });
 </script>
 
 </body>
