@@ -98,17 +98,18 @@ input[type="submit" i], button {
     font-size: 18px;
 }
 
+#directory_path {
+    flex-grow: 1;
+    border: none;
+    border-radius: 5px;
+    height: 42px;
+    padding: 0 10px;
+    font-size: 18px;
+}
+
 #ExportForm {
     padding: 20px;
     border-radius: 20px;
-}
-
-#checkbox-is_sql {
-    margin: 0;
-}
-
-#manualSQL-checkbox-div {
-    margin: 10px 0;
 }
 
 #sql_input {
@@ -152,6 +153,7 @@ th, td {
     border: 1px solid #ddd;
 }
 
+
 .alert-success {
     color: #c3e6cb;
 }
@@ -175,9 +177,8 @@ th, td {
     border: none;
     border-radius: 5px;
     font-size: 18px;
-    resize: vertical;
-    min-height: 19px;
-    width: 100%;
+    resize: both;
+    width: calc(100% - 20px);
 }
 
 .modal {
@@ -189,14 +190,14 @@ th, td {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(9, 14, 25, 0.8);
+    background-color: rgba(0, 0, 0, 0.7);
 }
 
 .modal-content {
-    background-color: rgb(31, 48, 63);
+    background-color: rgb(0, 0, 0);
     margin: 15% auto;
     padding: 20px;
-    box-shadow: inset 0 1px 2px 1px #637b8d;
+    border: 1px solid #888;
     width: 80%;
     text-align: center;
     border-radius: 10px;
@@ -204,6 +205,20 @@ th, td {
 
 .modal-body{
     margin: 5% auto;
+}
+
+.close {
+    color: #888;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .modalButtons {
@@ -217,7 +232,8 @@ th, td {
     border-radius: 5px;
 }
 
-.modalButtons:hover, .modalButtons:focus {
+.modalButtons:hover,
+.modalButtons:focus {
     color: white;
     text-decoration: none;
     cursor: pointer;
@@ -232,52 +248,20 @@ th, td {
     margin: 20px;
 }
 
-.form-group {
-    margin-bottom: 20px; /* Adjust the value to set the desired gap */
-}
-
-.form-group label {
-    display: inline-block;
-    width: 100px; /* Adjust the width of the label as needed */
-    margin-bottom: 5px; /* Adjust the value to set the desired gap */
-}
-
-.form-group input, .form-group select, .form-group textarea {
-    width: calc(20%); /* Adjust the width of the input field as needed */
-    margin-bottom: 5px; /* Adjust the value to set the desired gap */
-}
-
-.tooltip-icon {
-    position: relative;
-    display: inline-block;
-    margin: 5px;
-}
-
-.tooltip-icon i {
-    color: #ffe883;
-    cursor: pointer;
-}
-
-.tooltip-icon .tooltip-text {
-    display: none;
-    position: absolute;
-    background-color: rgb(132, 166, 165);
-    text-align: justify;
-    color: #000;
-    border: 1px solid #444444;
-    border-radius: 5px;
-    padding: 10px;
-    z-index: 1;
-    top: 100%;
-    left: 0;
-    min-width: 30vw;
-}
-
-.tooltip-icon .tooltip-text:after {
-    content: "";
+.input-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+    gap: 10px;
+    margin: 10px 0;
     width: 100%;
 }
 
-.tooltip-icon:hover .tooltip-text {
-    display: inline-block;
+.sql_form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px;
 }
+

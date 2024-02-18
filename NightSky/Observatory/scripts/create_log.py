@@ -8,7 +8,8 @@ from .parse_for_log import ParseForLog
 class Log:
     def __init__(self, headers, path):
         self.num = 1
-        self.rows = [["AGO 0.7m observation log"]]
+        self.COLUMNS = 15
+        self.rows = [["AGO 0.7m observation log"] + [""] * self.COLUMNS]
         self.headers = headers
         self.path = path
 
@@ -93,3 +94,6 @@ class Log:
         with open(name, "w", newline="") as csvfile:
             writer = csv.writer(csvfile, delimiter=",")
             writer.writerows(self.rows)
+        # convert csv to xlsx:
+        csv_file = pd.read_csv(name, header=None)
+        csv_file.to_excel(self.path + "/AGO_Log_excel_" + self.date + ".xlsx", index=False, header=False)

@@ -1,11 +1,17 @@
 from django import forms
+
 from .models import FitsImage
 
 
 class DirectoryForm(forms.Form):
     directory_path = forms.CharField(
         widget=forms.TextInput(
-            attrs={"placeholder": "Directory path", "id": "directory_path", "name": "directory_path", "type": "text"}
+            attrs={
+                "placeholder": "Directory path",
+                "id": "directory_path",
+                "name": "directory_path",
+                "type": "text",
+            }
         ),
         required=True,
     )
@@ -42,7 +48,8 @@ class DateObsField(forms.CharField):
                 #     raise forms.ValidationError("Invalid format.")
 
                 if left_endpoint > right_endpoint:
-                    raise forms.ValidationError("First endpoint of an interval must not be greater than the second one.")
+                    raise forms.ValidationError(
+                        "First endpoint of an interval must not be greater than the second one.")
 
                 # TODO: POZOR TU JE ZRADA DO BUDUCNA
                 integer_intervals.append((left_endpoint, right_endpoint))
@@ -231,11 +238,13 @@ class ExportForm(forms.Form):
     PHASE = MultipleFloatIntervalsField(required=False)
     RANGE = MultipleFloatIntervalsField(required=False)
 
-    object_name_choices = [
-        (image.OBJECT_NAME, image.OBJECT_NAME)
-        for image in FitsImage.objects.all().distinct("OBJECT_NAME").order_by("OBJECT_NAME")
-    ]
-
     OBJECT_NAME = forms.MultipleChoiceField(
-        choices=object_name_choices, widget=forms.CheckboxSelectMultiple, required=False
+        choices=[], widget=forms.CheckboxSelectMultiple, required=False
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["OBJECT_NAME"].choices = [
+            (image.OBJECT_NAME, image.OBJECT_NAME)
+            for image in FitsImage.objects.all().distinct("OBJECT_NAME").order_by("OBJECT_NAME")
+        ]

@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,6 +9,7 @@
     <title>Charon's Little Helper - Import Fits</title>
     <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
 </head>
+
 <body>
     <header class="title_a_navbar">
         <h1><a href="{% url 'home' %}">Charon's Little Helper</a></h1>
@@ -17,11 +19,9 @@
         </nav>
     </header>
     <div class="contents">
-
         <article class="content_part">
             <h2>Import Fits Images</h2>
         </article>
-
         <article class="content_part">
             <form method="post" action="{% url 'import_fits' %}">
 
@@ -42,9 +42,9 @@
 
             </form>
         </article>
-
         <article class="content_part" style="margin: 0">
             <form method="post" action="{% url 'import_fits' %}">
+
                 {% csrf_token %}
                 <h3>{{ form.directory_path.label_tag }}</h3>
                 <div class="form-container">
@@ -62,19 +62,17 @@
                 {% endif %}
 
             </form>
+            <script>
+            function triggerFileExplorer() {
+                fetch('{% url "open_file_explorer" %}')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('directory_path').value = data.directory_path;
+                })
+                .catch(error => console.error('Error:', error));
+            }
+            </script>
         </article>
-
     </div>
-
-    <script>
-        function triggerFileExplorer() {
-            fetch('{% url "open_file_explorer" %}')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('directory_path').value = data.directory_path;
-            })
-            .catch(error => console.error('Error:', error));
-        }
-    </script>
 </body>
 </html>

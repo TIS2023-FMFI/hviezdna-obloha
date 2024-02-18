@@ -1,0 +1,1 @@
+/command/with-contenv sh -c "cd /app/NightSky; python manage.py migrate"
