@@ -1,3 +1,9 @@
 from django.contrib import admin
+from .models import FitsImage
 
-# Register your models here.
+
+class FitsImageAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(FitsImage, FitsImageAdmin)
