@@ -124,7 +124,6 @@ def handle_import(directory_path, request, session_key):
 
 def process_and_log_directory(directory_path, request):
     first_insert = FitsImage.objects.count() == 0
-    print(first_insert)
 
     try:
         if first_insert:
@@ -157,12 +156,7 @@ def open_file_explorer(request):
     return JsonResponse({"directory_path": directory_path})
 
 
-def filter_fits_images(form_data):
-    ...
-    # Entry.objects.values_list("id", flat=True).order_by("id")
-
-
-def export_fits(request):  # TODO: REMOVE PRINTS
+def export_fits(request):
     if request.method == "POST":
 
         form = ExportForm(request.POST)
@@ -198,7 +192,6 @@ def export_fits(request):  # TODO: REMOVE PRINTS
 
         # Export form processing
         elif form.is_valid():
-            print(form.cleaned_data)
             queryset = FitsImage.objects.get_queryset()
 
             for field_name, field in form.fields.items():
@@ -221,12 +214,8 @@ def export_fits(request):  # TODO: REMOVE PRINTS
                     queryset = queryset.filter(q_objects)
 
             paths = queryset.values_list("PATH", flat=True)
-            # TODO: remove csv write ???
-            csv_writer = CsvWriter(queryset)
-            csv_writer.write(target_path)
             ids = [item.pk for item in queryset]
-            print(ids)
-            print(paths)
+
             return JsonResponse({"ids": ids, "source_paths": list(paths), "target_path": target_path})
 
         return redirect("export_fits")
@@ -239,9 +228,6 @@ def export_fits(request):  # TODO: REMOVE PRINTS
 
 def execute_sql_query(sql_input):
     return FitsImage.objects.raw(sql_input)
-    # with connection.cursor() as cursor:
-    #     cursor.execute(sql_input)
-    #     return cursor.fetchall()
 
 
 def copy_data(request):

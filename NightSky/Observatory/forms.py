@@ -17,7 +17,6 @@ class DirectoryForm(forms.Form):
     )
 
 
-# TODO: zlepsit medzery v inpute
 class DateObsField(forms.CharField):
     def to_python(self, value):
         value = value.replace(" ", "")
@@ -51,7 +50,6 @@ class DateObsField(forms.CharField):
                     raise forms.ValidationError(
                         "First endpoint of an interval must not be greater than the second one.")
 
-                # TODO: POZOR TU JE ZRADA DO BUDUCNA
                 integer_intervals.append((left_endpoint, right_endpoint))
                 raw_left_endpoint = ""
 
@@ -124,7 +122,6 @@ class MultipleIntegerIntervalsField(forms.CharField):
                 if left_endpoint > right_endpoint:
                     raise forms.ValidationError("First endpoint of an interval must be smaller than the second one.")
 
-                # TODO: POZOR TU JE ZRADA DO BUDUCNA
                 integer_intervals.append((left_endpoint, right_endpoint))
                 raw_left_endpoint = ""
 
@@ -184,7 +181,6 @@ class MultipleFloatIntervalsField(forms.CharField):
                 if left_endpoint > right_endpoint:
                     raise forms.ValidationError("First endpoint of an interval must be smaller than the second one.")
 
-                # TODO: POZOR TU JE ZRADA DO BUDUCNA
                 float_intervals.append((left_endpoint, right_endpoint))
                 raw_left_endpoint = ""
 
