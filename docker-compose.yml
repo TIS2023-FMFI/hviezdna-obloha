@@ -17,7 +17,9 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ./NightSky/:/app/NightSky/
-      - ./images:/fits-images  # change ./images to the directory where images will be imported from
+      - ./images:/fits-archive  # change ./images to the FITS archive directory (for quick last night import)
+      - ./images:/charon  # change ./images to a directory where the file chooser should open (for custom paths)
+
     environment:
       - DISPLAY=${DISPLAY}
       - DEBUG=True  # change True to False for production
