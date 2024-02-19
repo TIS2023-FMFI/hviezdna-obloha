@@ -1,11 +1,17 @@
 from django import forms
+
 from .models import FitsImage
 
 
 class DirectoryForm(forms.Form):
     directory_path = forms.CharField(
         widget=forms.TextInput(
-            attrs={"placeholder": "Directory path", "id": "directory_path", "name": "directory_path", "type": "text"}
+            attrs={
+                "placeholder": "Directory path",
+                "id": "directory_path",
+                "name": "directory_path",
+                "type": "text",
+            }
         ),
         required=True,
     )
@@ -231,11 +237,14 @@ class ExportForm(forms.Form):
 
     OBSERVER = MultipleStringsField(widget=forms.TextInput(attrs={"placeholder": "String"}), required=False)
 
-    # object_name_choices = [
-    #     (image.OBJECT_NAME, image.OBJECT_NAME)
-    #     for image in FitsImage.objects.all().distinct("OBJECT_NAME").order_by("OBJECT_NAME")
-    # ]
     #
     # OBJECT_NAME = forms.MultipleChoiceField(
     #     choices=object_name_choices, widget=forms.CheckboxSelectMultiple, required=False
     # )
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.fields["OBJECT_NAME"].choices = [
+    #         (image.OBJECT_NAME, image.OBJECT_NAME)
+    #         for image in FitsImage.objects.all().distinct("OBJECT_NAME").order_by("OBJECT_NAME")
+    #     ]

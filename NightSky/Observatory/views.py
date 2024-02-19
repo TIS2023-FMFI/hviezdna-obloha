@@ -199,7 +199,7 @@ def export_fits(request):  # TODO: REMOVE PRINTS
         # Export form processing
         elif form.is_valid():
             print(form.cleaned_data)
-            queryset = FitsImage.objects.all()
+            queryset = FitsImage.objects.get_queryset()
 
             for field_name, field in form.fields.items():
                 field_input = form.cleaned_data.get(field_name)
