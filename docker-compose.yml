@@ -1,0 +1,31 @@
+version: '3.4'
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  web:
+    build:
+      context: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./NightSky/:/app/NightSky/
+      - ./images:/fits-images  # change ./images to the directory where images will be imported from
+    environment:
+      - DISPLAY=${DISPLAY}
+      - DEBUG=True  # change True to False for production
+#      - ALLOWED_HOSTS=  # set this to a comma separated list of allowed hosts for production
+#      - SECRET_KEY=  # set this to a securely generated long random value for production
+    depends_on:
+      - db
+    command: "./start_dev.sh"  # comment this line out for production
+
+volumes:
+  postgres_data:

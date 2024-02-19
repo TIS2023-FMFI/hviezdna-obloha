@@ -6,3 +6,4 @@ db.*
 NightSky/.idea/
 .idea/
 Observatory/migrations/
+venv/

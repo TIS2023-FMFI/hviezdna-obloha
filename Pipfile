@@ -5,10 +5,13 @@ name = "pypi"
 
 [packages]
 django = "*"
-psycopg2 = "*"
+psycopg = {extras = ["binary"], version = "*"}
 astropy = "*"
 pandas = "*"
 openpyxl = "*"
+matplotlib = "*"
+gunicorn = "*"
+django-queryset-csv = "*"
 
 [dev-packages]
 pre-commit = "*"
