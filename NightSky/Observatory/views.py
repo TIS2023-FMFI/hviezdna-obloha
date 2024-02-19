@@ -80,7 +80,7 @@ def last_ccd_temperature(request):
 def import_fits(request):
     form = DirectoryForm(request.POST or None)
 
-    path = os.environ.get("FITS_ARCHIVE", r"/fits-images")
+    path = os.environ.get("FITS_ARCHIVE", r"/fits-archive")
 
     # Get the last added directory path in the archive
     last_added_directory_path = get_last_added_directory_path(path, request)
@@ -150,7 +150,7 @@ def open_file_explorer(request):
     root = tk.Tk()
     root.withdraw()
     root.attributes("-topmost", True)  # bring the window to the top
-    directory_path = filedialog.askdirectory(initialdir=os.environ.get("FITS_ARCHIVE", r"/fits-images"))
+    directory_path = filedialog.askdirectory(initialdir=os.environ.get("CHARON", r"/charon"))
     root.destroy()
     return JsonResponse({"directory_path": directory_path})
 
