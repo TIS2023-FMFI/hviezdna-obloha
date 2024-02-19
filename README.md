@@ -12,9 +12,14 @@ Projekt na Tvorbu informačných systémov 2023 - prehliadanie databázy pozorov
 - [docker-compose](https://docs.docker.com/compose/install/)
 
 ## Configuration
-- adjust the `docker-compose.yml` file according to instructions contained in it
+- adjust `docker-compose.yml` file according to the included instructions in comments
 
-## Running
+## Run
 ```shell
 docker-compose up
+```
+
+## Restart
+```shell
+docker-compose restart
 ```
