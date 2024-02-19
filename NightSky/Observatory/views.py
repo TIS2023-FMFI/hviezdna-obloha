@@ -25,7 +25,6 @@ from .scripts.insert import Insert
 from .scripts.create_log import Log
 from .scripts.first_insert import process_folders_with_fits
 from .scripts.generate_sky_map import generate_sky_map
-from .scripts.config import Config
 
 from datetime import datetime, timedelta
 import re
@@ -171,7 +170,7 @@ def export_fits(request):
 
             if sql_input:
                 try:
-                    raw_queryset = execute_sql_query(sql_input)
+                    raw_queryset = FitsImage.objects.raw(sql_input)
                     paths = [fits.PATH for fits in raw_queryset]
                     ids = [item.pk for item in raw_queryset]
 
@@ -226,10 +225,6 @@ def export_fits(request):
     return render(request, "Observatory/export_fits.html", {"form": form})
 
 
-def execute_sql_query(sql_input):
-    return FitsImage.objects.raw(sql_input)
-
-
 def copy_data(request):
     if request.method == "POST":
         ids = request.POST.getlist("ids")
@@ -279,53 +274,25 @@ def is_valid_sql_query(query):
 
 
 def add_quotes(query):
-    columns = [
-        "ID",
-        "NAXIS",
-        "NAXIS1",
-        "NAXIS2",
-        "IMAGETYP",
-        "FILTER",
-        "OBJECT_NAME",
-        "SERIES",
-        "NOTES",
-        "DATE_OBS",
-        "MJD_OBS",
-        "EXPTIME",
-        "CCD_TEMP",
-        "XBINNING",
-        "YBINNING",
-        "XORGSUBF",
-        "YORGSUBF",
-        "MODE",
-        "GAIN",
-        "RD_NOISE",
-        "OBSERVER",
-        "RA",
-        "DEC",
-        "RA_PNT",
-        "DEC_PNT",
-        "AZIMUTH",
-        "ELEVATIO",
-        "AIRMASS",
-        "RATRACK",
-        "DECTRACK",
-        "PHASE",
-        "RANGE",
-        "PATH",
-    ]
+    columns = [field.name for field in FitsImage._meta.get_fields()]
     query_words = query.split()
+
     for i in range(len(query_words)):
         word = query_words[i].upper()
+
         if word in columns:  # if the column name does not contain quotes and contains a space before the operator
             query_words[i] = f'"{word}"'
+
         elif word[1:-1] in columns:  # if the column name contains quotes and a space before the operator
             query_words[i] = f'"{word[1:-1]}"'
+
         elif len(word) > 1 and any(op in word for op in [">=", "<=", "<", ">", "=", ","]):
             operator = get_comparison_operator(word)
             position = word.find(operator)
+
             if word[:position] in columns:  # if the column name does not contain quotes and a space before the operator
                 query_words[i] = f'"{word[:position]}"' + word[position:]
+
             if word[
                1:position - 1] in columns:  # if the column name contains quotes and does not contain a space before the operator
                 query_words[i] = f'"{word[1:position - 1]}"' + word[position:]
