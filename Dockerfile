@@ -29,7 +29,6 @@ COPY Pipfile Pipfile.lock ./
 RUN pipenv install --system --dev --deploy
 
 COPY NightSky ./NightSky
-RUN chmod +x NightSky/start_dev.sh
 
 COPY docker/s6 /etc/s6-overlay/s6-rc.d
 COPY docker/Caddyfile /app/Caddyfile

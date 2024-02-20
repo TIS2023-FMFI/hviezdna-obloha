@@ -11,7 +11,7 @@ def insert_fits_in_folder(folder):
 
 
 def process_folders_with_fits(root_dir):
-    count = 0
+    count = insert_fits_in_folder(root_dir)
     root_path = Path(root_dir)
 
     for folder in root_path.rglob("*"):
