@@ -13,6 +13,8 @@ Projekt na Tvorbu informačných systémov 2023 - prehliadanie databázy pozorov
 
 ## Configuration
 - adjust `docker-compose.yml` file according to the included instructions in comments
+- set permissions `chmod +x NightSky/start_dev.sh`
+
 
 ## Run
 ```shell
